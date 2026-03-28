@@ -5,13 +5,13 @@
 
 // ── SUPABASE CONFIG ──────────────────────────────────────────
 // Replace these with your actual Supabase credentials from .env
-const SUPABASE_URL = window.SUPABASE_URL || 'https://your-project.supabase.co';
-const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'your-anon-key';
+const SUPABASE_URL = window.SUPABASE_URL || 'https://vkxbxjrddejjfavcrmjl.supabase.co';
+const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZreGJ4anJkZGVqamZhdmNybWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2ODA5MDEsImV4cCI6MjA5MDI1NjkwMX0.9qdRV5fShbdiV03IzlXec_X4ImyC73AQUqHzUdYcig0';
 
 // Initialize Supabase client (loaded via CDN in HTML)
 let supabase = null;
 function initSupabase() {
-  if (window.supabase && SUPABASE_URL !== 'https://your-project.supabase.co') {
+  if (window.supabase && SUPABASE_URL !== 'https://vkxbxjrddejjfavcrmjl.supabase.co') {
     supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   }
   return supabase;

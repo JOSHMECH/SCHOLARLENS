@@ -148,8 +148,8 @@ By default the app runs in **demo mode** using localStorage. To enable real auth
 
 ```html
 <script>
-  window.SUPABASE_URL      = 'https://your-project.supabase.co';
-  window.SUPABASE_ANON_KEY = 'your-anon-public-key';
+  window.SUPABASE_URL      = 'https://vkxbxjrddejjfavcrmjl.supabase.co';
+  window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZreGJ4anJkZGVqamZhdmNybWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2ODA5MDEsImV4cCI6MjA5MDI1NjkwMX0.9qdRV5fShbdiV03IzlXec_X4ImyC73AQUqHzUdYcig0';
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 ```
