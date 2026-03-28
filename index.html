@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScholarLens — Predict Your Academic Success</title>
+  <meta name="description" content="AI-powered academic performance prediction. Know where you'll land before results come out." />
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    /* Page-specific additions */
+    .cta-section {
+      padding: 80px 0;
+      text-align: center;
+    }
+    .cta-card {
+      background: linear-gradient(135deg, var(--green-700), var(--green-500));
+      border-radius: var(--radius-xl);
+      padding: 64px 40px;
+      color: #fff;
+    }
+    .cta-card h2 { font-family: var(--font-display); font-size: 2rem; font-weight: 700; margin-bottom: 12px; }
+    .cta-card p  { opacity: .85; margin-bottom: 32px; font-size: 1rem; }
+    .cta-card .btn-secondary { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.3); color: #fff; }
+    .cta-card .btn-secondary:hover { background: rgba(255,255,255,.25); }
+    .nav-auth { display: flex; align-items: center; gap: 8px; }
+
+    .mockup-preview {
+      max-width: 780px;
+      margin: 60px auto 0;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-xl);
+    }
+    .mockup-bar {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .mockup-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+    .mockup-body { padding: 32px; }
+    .mockup-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+    .mockup-stat {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+    }
+    .mockup-stat-label { font-size: .7rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+    .mockup-stat-val { font-family: var(--font-display); font-size: 1.75rem; font-weight: 700; color: var(--text); }
+    .mockup-stat-val.green { color: var(--green-600); }
+    .mockup-stat-val.amber { color: var(--amber-500); }
+    .mockup-bar-viz { margin-top: 8px; }
+    .how-section { padding: 80px 0; }
+    .steps { display: flex; flex-direction: column; gap: 0; max-width: 620px; margin: 0 auto; }
+    .step { display: flex; gap: 20px; padding: 28px 0; }
+    .step + .step { border-top: 1px dashed var(--border); }
+    .step-num {
+      width: 44px; height: 44px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--green-600), var(--green-400));
+      color: #fff;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700;
+      font-size: 1.125rem;
+      box-shadow: 0 4px 12px rgba(34,197,94,.3);
+    }
+    .step-content h3 { font-weight: 700; font-size: 1.0625rem; margin-bottom: 6px; }
+    .step-content p  { color: var(--text-muted); font-size: .875rem; line-height: 1.65; }
+  </style>
+</head>
+<body>
+
+<!-- ── NAVBAR ───────────────────────────────────────────── -->
+<nav class="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">🎓</div>
+        Scholar<span>Lens</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link active">Home</a>
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#how-it-works" class="nav-link">How it works</a>
+      </div>
+      <div class="nav-auth">
+        <button class="theme-toggle" title="Toggle theme">🌙</button>
+        <a href="auth.html" class="btn btn-secondary btn-sm">Log in</a>
+        <a href="auth.html?mode=register" class="btn btn-primary btn-sm">Get started free</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ── HERO ─────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-eyebrow animate-fade-in">
+      <span>✨</span> AI-Powered Academic Analytics
+    </div>
+    <h1 class="hero-title animate-slide-up delay-1">
+      Know Your CGPA<br/>
+      <span class="accent">Before Results Drop</span>
+    </h1>
+    <p class="hero-subtitle animate-slide-up delay-2">
+      ScholarLens uses multivariate regression to predict your academic
+      performance and gives you a personalised roadmap to hit your target CGPA.
+    </p>
+    <div class="hero-actions animate-slide-up delay-3">
+      <a href="auth.html?mode=register" class="btn btn-primary btn-lg">
+        🚀 Start Predicting Free
+      </a>
+      <a href="#how-it-works" class="btn btn-secondary btn-lg">
+        See how it works
+      </a>
+    </div>
+
+    <div class="hero-features animate-fade-in delay-4">
+      <div class="hero-feature">
+        <div class="hero-feature-icon">📊</div>
+        ML Predictions
+      </div>
+      <div class="hero-feature">
+        <div class="hero-feature-icon">🎯</div>
+        Personalised Goals
+      </div>
+      <div class="hero-feature">
+        <div class="hero-feature-icon">📈</div>
+        Progress Tracking
+      </div>
+      <div class="hero-feature">
+        <div class="hero-feature-icon">🔒</div>
+        Secure & Private
+      </div>
+    </div>
+
+    <!-- UI Mockup Preview -->
+    <div class="mockup-preview animate-slide-up delay-5">
+      <div class="mockup-bar">
+        <div class="mockup-dot" style="background:#ff5f57;"></div>
+        <div class="mockup-dot" style="background:#febc2e;"></div>
+        <div class="mockup-dot" style="background:#28c840;"></div>
+        <span style="font-size:.75rem;color:var(--text-muted);margin-left:8px;">scholarlens.app/dashboard</span>
+      </div>
+      <div class="mockup-body">
+        <div class="mockup-stats">
+          <div class="mockup-stat">
+            <div class="mockup-stat-label">Predicted CGPA</div>
+            <div class="mockup-stat-val green">3.74</div>
+          </div>
+          <div class="mockup-stat">
+            <div class="mockup-stat-label">Target CGPA</div>
+            <div class="mockup-stat-val">4.00</div>
+          </div>
+          <div class="mockup-stat">
+            <div class="mockup-stat-label">Risk Level</div>
+            <div class="mockup-stat-val amber">Medium</div>
+          </div>
+        </div>
+        <div class="progress-wrap mockup-bar-viz">
+          <div class="progress-header">
+            <span class="progress-label">Progress to Target</span>
+            <span class="progress-value">93.5%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width:93.5%;"></div>
+          </div>
+        </div>
+        <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+          <div class="rec-item" style="flex:1;min-width:200px;">
+            <div class="rec-icon">📚</div>
+            <div class="rec-text">
+              <div class="rec-title">Increase study by 2.5 hrs/week</div>
+              <div class="rec-desc">Currently at 18 hrs → target 20.5 hrs</div>
+            </div>
+          </div>
+          <div class="rec-item" style="flex:1;min-width:200px;">
+            <div class="rec-icon">🏫</div>
+            <div class="rec-text">
+              <div class="rec-title">Boost attendance to 90%</div>
+              <div class="rec-desc">Currently at 78% → 12% improvement needed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── STATS BAR ─────────────────────────────────────────── -->
+<section style="padding: 0 0 40px;">
+  <div class="container">
+    <div class="stats-bar">
+      <div>
+        <div class="stats-bar-value">10K+</div>
+        <div class="stats-bar-label">Students Analyzed</div>
+      </div>
+      <div>
+        <div class="stats-bar-value">94%</div>
+        <div class="stats-bar-label">Prediction Accuracy</div>
+      </div>
+      <div>
+        <div class="stats-bar-value">2.3×</div>
+        <div class="stats-bar-label">Avg. CGPA Improvement</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ──────────────────────────────────────────── -->
+<section id="features" class="features-section">
+  <div class="container">
+    <div class="section-header" style="text-align:center;">
+      <h2 class="section-title">Everything you need to excel</h2>
+      <p class="section-subtitle">From raw data to actionable study plans — in seconds.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🧮</div>
+        <h3 class="feature-title">Multivariate Regression Model</h3>
+        <p class="feature-desc">Our ML model is trained on thousands of student records, weighing study hours, attendance, carry-overs, and current GPA together.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <h3 class="feature-title">Personalised Recommendations</h3>
+        <p class="feature-desc">Get exact numbers: how many hours to add, what attendance rate to hit, and which habits to change to close the gap.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3 class="feature-title">Progress Over Time</h3>
+        <p class="feature-desc">Track your predictions semester by semester. See if the changes you made actually moved your projected CGPA.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3 class="feature-title">Instant Results</h3>
+        <p class="feature-desc">No waiting. Enter your data and get a full analysis — CGPA prediction, risk level, and action plan — in under a second.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3 class="feature-title">Secure by Default</h3>
+        <p class="feature-desc">Authentication via Supabase with row-level security. Your academic data is yours alone — never sold, never shared.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌙</div>
+        <h3 class="feature-title">Dark Mode & Mobile Ready</h3>
+        <p class="feature-desc">Fully responsive design that looks great on any device. Study late? Switch to dark mode with one click.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ───────────────────────────────────────── -->
+<section id="how-it-works" class="how-section" style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="section-header" style="text-align:center;">
+      <h2 class="section-title">How ScholarLens works</h2>
+      <p class="section-subtitle">Three simple steps from data to direction.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Enter your academic data</h3>
+          <p>Input your current CGPA, target CGPA, weekly study hours, attendance rate, and number of carry-overs in our clean dashboard form.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Our model runs the analysis</h3>
+          <p>A multivariate linear regression model trained on real-world student data computes your predicted CGPA and risk level in milliseconds.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Get your personalised action plan</h3>
+          <p>See the exact gap between your predicted and target CGPA, plus specific, measurable steps to close that gap before your next semester.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ───────────────────────────────────────────────── -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-card">
+      <h2>Ready to take control of your grades?</h2>
+      <p>Join thousands of students already using ScholarLens to plan smarter, study better, and graduate stronger.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a href="auth.html?mode=register" class="btn btn-secondary btn-lg">
+          Create free account
+        </a>
+        <a href="auth.html" class="btn btn-secondary btn-lg">
+          Log in
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────── -->
+<footer class="footer">
+  <div class="container">
+    <p>© 2025 <strong>ScholarLens</strong>. Built with 💚 for students everywhere.</p>
+    <p style="margin-top:6px;">
+      Powered by <a href="#">Supabase</a> &amp; scikit-learn. Your data is always secure.
+    </p>
+  </div>
+</footer>
+
+<div id="toast-container"></div>
+
+<script src="js/app.js"></script>
+<script>
+  // Check if already logged in → redirect to dashboard
+  (async () => {
+    await Auth.init();
+    if (Auth.isAuthenticated()) {
+      // Update nav for logged-in users
+      const navAuth = document.querySelector('.nav-auth');
+      if (navAuth) {
+        navAuth.innerHTML = `
+          <button class="theme-toggle">🌙</button>
+          <a href="dashboard.html" class="btn btn-secondary btn-sm">Dashboard</a>
+          <button data-action="logout" class="btn btn-primary btn-sm">Log out</button>
+        `;
+        Theme.init();
+      }
+    }
+  })();
+</script>
+</body>
+</html>

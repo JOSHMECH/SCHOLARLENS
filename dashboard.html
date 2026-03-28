@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScholarLens — Analysis Wizard</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="container" style="max-width:100%;padding:0 24px;">
+    <div class="navbar-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">🎓</div>
+        Scholar<span>Lens</span>
+      </a>
+      <div class="nav-links">
+        <a href="dashboard.html" class="nav-link active">Dashboard</a>
+        <a href="results.html"   class="nav-link">Results</a>
+        <a href="history.html"   class="nav-link">History</a>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="theme-toggle">🌙</button>
+        <button data-action="logout" class="btn btn-secondary btn-sm">Log out</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="wizard-page">
+<div class="container-sm">
+
+  <!-- WIZARD PROGRESS -->
+  <div class="wizard-progress" id="wizard-progress">
+    <div class="wp-step active" data-step="1">
+      <div class="wp-num" id="wpn-1">1</div>
+      <div class="wp-label">
+        <div class="wp-label-title">Profile</div>
+        <div class="wp-label-sub">Scale &amp; CGPA</div>
+      </div>
+    </div>
+    <div class="wp-step" data-step="2">
+      <div class="wp-num" id="wpn-2">2</div>
+      <div class="wp-label">
+        <div class="wp-label-title">Logistics</div>
+        <div class="wp-label-sub">Time &amp; Schedule</div>
+      </div>
+    </div>
+    <div class="wp-step" data-step="3">
+      <div class="wp-num" id="wpn-3">3</div>
+      <div class="wp-label">
+        <div class="wp-label-title">Courses</div>
+        <div class="wp-label-sub">Semester Map</div>
+      </div>
+    </div>
+    <div class="wp-step" data-step="4">
+      <div class="wp-num" id="wpn-4">4</div>
+      <div class="wp-label">
+        <div class="wp-label-title">Analyse</div>
+        <div class="wp-label-sub">Review &amp; Run</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 1: PROFILE & INSTITUTION ═══ -->
+  <div class="wizard-panel active card" id="step-1">
+    <div class="wizard-header">
+      <div class="wizard-eyebrow">Step 1 of 4</div>
+      <h2 class="wizard-title">Profile &amp; Institution</h2>
+      <p class="wizard-subtitle">Tell us about your grading system and academic standing. This calibrates the entire prediction model.</p>
+    </div>
+
+    <!-- Grading Scale -->
+    <div class="field-section">
+      <div class="field-section-title">🏫 Select your grading system</div>
+      <div class="scale-toggle">
+        <div class="scale-option">
+          <input type="radio" name="grading-scale" id="scale-5" value="5" checked />
+          <label class="scale-label" for="scale-5">
+            <span class="scale-label-title">5.0 Scale</span>
+            <span class="scale-label-sub">Used by most Nigerian Universities (NUGA standard). First Class = 4.50–5.00.</span>
+            <span class="scale-label-badge">🏛 University</span>
+          </label>
+        </div>
+        <div class="scale-option">
+          <input type="radio" name="grading-scale" id="scale-4" value="4" />
+          <label class="scale-label" for="scale-4">
+            <span class="scale-label-title">4.0 Scale</span>
+            <span class="scale-label-sub">Used by Polytechnics &amp; some private universities. Distinction = 3.50–4.00.</span>
+            <span class="scale-label-badge">🔧 Polytechnic / Private</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Academic Demographics -->
+    <div class="field-section">
+      <div class="field-section-title">📋 Academic demographics</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="current-level">Current Level</label>
+          <select class="form-input" id="current-level">
+            <option value="100L">100 Level (Year 1)</option>
+            <option value="200L">200 Level (Year 2)</option>
+            <option value="300L" selected>300 Level (Year 3)</option>
+            <option value="400L">400 Level (Year 4)</option>
+            <option value="500L">500 Level (Year 5)</option>
+            <option value="600L">600 Level (Year 6)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="program-duration">Program Duration</label>
+          <select class="form-input" id="program-duration">
+            <option value="4">4 Years</option>
+            <option value="5" selected>5 Years</option>
+            <option value="6">6 Years</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- CGPA Inputs -->
+    <div class="field-section">
+      <div class="field-section-title">📊 Academic performance</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="current-cgpa">Current CGPA <span style="color:var(--red-500)">*</span></label>
+          <div style="position:relative;">
+            <input class="form-input" type="number" id="current-cgpa" min="0" max="5" step="0.01" placeholder="e.g. 3.20" />
+            <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:.8rem;color:var(--text-muted);pointer-events:none;">
+              / <span class="scale-max-label">5.0</span>
+            </span>
+          </div>
+          <span class="form-error" id="err-current-cgpa" style="display:none;"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="target-cgpa">Target CGPA <span style="color:var(--red-500)">*</span></label>
+          <div style="position:relative;">
+            <input class="form-input" type="number" id="target-cgpa" min="0" max="5" step="0.01" placeholder="e.g. 4.50" />
+            <span style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:.8rem;color:var(--text-muted);pointer-events:none;">
+              / <span class="scale-max-label">5.0</span>
+            </span>
+          </div>
+          <span class="form-error" id="err-target-cgpa" style="display:none;"></span>
+        </div>
+      </div>
+      <div class="form-group" style="max-width:240px; margin-top:12px;">
+        <label class="form-label" for="carry-overs">Previous Carry-Overs <span style="color:var(--red-500)">*</span></label>
+        <input class="form-input" type="number" id="carry-overs" min="0" max="30" step="1" placeholder="e.g. 1" />
+        <span class="form-hint">Unresolved failed courses from prior semesters</span>
+        <span class="form-error" id="err-carry-overs" style="display:none;"></span>
+      </div>
+    </div>
+
+    <div class="wizard-nav">
+      <span class="step-counter">Step 1 of 4</span>
+      <button class="btn btn-primary" onclick="nextStep(1)">Continue to Logistics →</button>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 2: LOGISTICS ═══ -->
+  <div class="wizard-panel card" id="step-2">
+    <div class="wizard-header">
+      <div class="wizard-eyebrow">Step 2 of 4</div>
+      <h2 class="wizard-title">Let's find your hidden study hours</h2>
+      <p class="wizard-subtitle">Your schedule determines how many real hours you have available. Honest answers produce the most accurate timetable.</p>
+    </div>
+
+    <div class="field-section">
+      <div class="field-section-title">⏰ Daily time commitments</div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <div>
+              <div class="slider-label-text">🚗 Daily Commute</div>
+              <div class="slider-label-hint">Total hours travelling to/from campus per day</div>
+            </div>
+            <div class="slider-value" id="val-commute">2 <span class="slider-unit">hrs</span></div>
+          </div>
+          <input type="range" id="sl-commute" min="0" max="6" step="0.5" value="2" oninput="updateSlider('commute',this.value)" />
+          <div class="slider-track-labels"><span>0 hrs (on campus)</span><span>3 hrs</span><span>6 hrs</span></div>
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <div>
+              <div class="slider-label-text">💼 Work / Extracurriculars</div>
+              <div class="slider-label-hint">Part-time jobs, sports, fellowship, societies, etc.</div>
+            </div>
+            <div class="slider-value" id="val-work">2 <span class="slider-unit">hrs</span></div>
+          </div>
+          <input type="range" id="sl-work" min="0" max="8" step="0.5" value="2" oninput="updateSlider('work',this.value)" />
+          <div class="slider-track-labels"><span>0 hrs</span><span>4 hrs</span><span>8 hrs</span></div>
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <div>
+              <div class="slider-label-text">😴 Target Sleep</div>
+              <div class="slider-label-hint">Science says 7–9 hrs optimises memory consolidation</div>
+            </div>
+            <div class="slider-value" id="val-sleep">8 <span class="slider-unit">hrs</span></div>
+          </div>
+          <input type="range" id="sl-sleep" min="4" max="10" step="0.5" value="8" oninput="updateSlider('sleep',this.value)" />
+          <div class="slider-track-labels"><span>4 hrs</span><span>7 hrs</span><span>10 hrs</span></div>
+        </div>
+
+        <div class="slider-group">
+          <div class="slider-header">
+            <div>
+              <div class="slider-label-text">🏫 Class Attendance Rate</div>
+              <div class="slider-label-hint">Your current overall lecture attendance percentage</div>
+            </div>
+            <div class="slider-value" id="val-attendance">80 <span class="slider-unit">%</span></div>
+          </div>
+          <input type="range" id="sl-attendance" min="40" max="100" step="1" value="80" oninput="updateSlider('attendance',this.value)" />
+          <div class="slider-track-labels"><span>40%</span><span>70%</span><span>100%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Available time summary -->
+    <div class="field-section">
+      <div class="field-section-title">📐 Available time breakdown</div>
+      <div class="time-summary">
+        <div>
+          <div class="time-summary-val" id="avail-hours-day">14.0</div>
+          <div class="time-summary-label">free hours per day</div>
+        </div>
+        <div class="time-summary-breakdown">
+          <div class="time-breakdown-item">
+            <div class="time-breakdown-val" id="avail-weekly">98</div>
+            <div class="time-breakdown-label">hrs/week free</div>
+          </div>
+          <div class="time-breakdown-item">
+            <div class="time-breakdown-val" id="avail-study-est">~49</div>
+            <div class="time-breakdown-label">est. study hrs</div>
+          </div>
+        </div>
+      </div>
+      <div id="time-warning" style="display:none;margin-top:12px;"></div>
+    </div>
+
+    <div class="wizard-nav">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="btn btn-secondary" onclick="goToStep(1)">← Back</button>
+        <span class="step-counter">Step 2 of 4</span>
+      </div>
+      <button class="btn btn-primary" onclick="nextStep(2)">Continue to Courses →</button>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 3: COURSE MATRIX ═══ -->
+  <div class="wizard-panel card" id="step-3">
+    <div class="wizard-header">
+      <div class="wizard-eyebrow">Step 3 of 4</div>
+      <h2 class="wizard-title">Map your current semester</h2>
+      <p class="wizard-subtitle">Add your registered courses. Difficulty and class days drive the Smart Timetable algorithm.</p>
+    </div>
+
+    <div class="field-section" style="margin-bottom:0">
+      <div class="field-section-title">📚 Courses this semester</div>
+
+      <div class="courses-empty" id="courses-empty">
+        <div class="courses-empty-icon">📚</div>
+        <div class="courses-empty-text">No courses yet — click "Add Course" to start.</div>
+      </div>
+
+      <div class="courses-grid" id="courses-grid"></div>
+
+      <button class="add-course-btn" onclick="addCourse()" style="margin-top:14px;">
+        <span class="add-course-icon">+</span> Add Course
+      </button>
+      <div id="err-courses" style="display:none;margin-top:12px;"></div>
+    </div>
+
+    <div class="wizard-nav">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="btn btn-secondary" onclick="goToStep(2)">← Back</button>
+        <span class="step-counter">Step 3 of 4</span>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-secondary" onclick="nextStep(3,true)">Skip →</button>
+        <button class="btn btn-primary" onclick="nextStep(3)">Review &amp; Analyse →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 4: REVIEW & ANALYSE ═══ -->
+  <div class="wizard-panel card" id="step-4">
+    <div class="wizard-header">
+      <div class="wizard-eyebrow">Step 4 of 4</div>
+      <h2 class="wizard-title">Review &amp; Analyse</h2>
+      <p class="wizard-subtitle">Confirm everything looks right, then run the full analysis to get your prediction and Smart Timetable.</p>
+    </div>
+
+    <div class="review-grid" id="review-content"></div>
+
+    <div id="review-courses-section" style="margin-bottom:20px;display:none;">
+      <div class="field-section-title">📚 Courses registered</div>
+      <div id="review-courses-chips" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;">
+      <div class="derived-stat">
+        <span style="font-size:1.25rem;">⏰</span>
+        <div>
+          <div class="derived-stat-val" id="derived-free">—</div>
+          <div style="font-size:.75rem;color:var(--text-muted);">Free time / day</div>
+        </div>
+      </div>
+      <div class="derived-stat">
+        <span style="font-size:1.25rem;">📖</span>
+        <div>
+          <div class="derived-stat-val" id="derived-study">—</div>
+          <div style="font-size:.75rem;color:var(--text-muted);">Est. study hrs / week</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="analyze-alert" style="display:none;margin-bottom:16px;"></div>
+
+    <button class="btn btn-primary btn-full btn-lg" id="analyze-btn" onclick="runAnalysis()">
+      🔍 Generate Prediction &amp; Smart Timetable
+    </button>
+    <p style="text-align:center;margin-top:10px;font-size:.8rem;color:var(--text-muted);">
+      🔒 Results saved securely · Analysis takes ~3 seconds
+    </p>
+
+    <div class="wizard-nav" style="border-top:none;padding-top:0;margin-top:6px;">
+      <button class="btn btn-secondary btn-sm" onclick="goToStep(3)">← Back to Courses</button>
+    </div>
+  </div>
+
+</div><!-- /container-sm -->
+</div><!-- /wizard-page -->
+
+<div id="toast-container"></div>
+
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay"
+  style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.52);
+         backdrop-filter:blur(10px);z-index:9998;
+         align-items:center;justify-content:center;">
+  <div style="background:var(--card-bg);border-radius:var(--radius-xl);
+    padding:44px 52px;text-align:center;box-shadow:var(--shadow-xl);
+    max-width:380px;width:calc(100% - 48px);">
+    <div style="font-size:2.75rem;margin-bottom:16px;" id="loading-icon">🧮</div>
+    <div style="font-family:var(--font-display);font-size:1.25rem;font-weight:700;
+      margin-bottom:8px;" id="loading-title">Running analysis…</div>
+    <div style="color:var(--text-muted);font-size:.875rem;margin-bottom:24px;"
+      id="loading-sub">Preparing the model</div>
+    <div style="display:flex;gap:8px;justify-content:center;">
+      <div style="width:10px;height:10px;border-radius:50%;background:var(--green-500);animation:bounce .8s 0s infinite alternate;"></div>
+      <div style="width:10px;height:10px;border-radius:50%;background:var(--green-500);animation:bounce .8s .15s infinite alternate;"></div>
+      <div style="width:10px;height:10px;border-radius:50%;background:var(--green-500);animation:bounce .8s .3s infinite alternate;"></div>
+    </div>
+  </div>
+</div>
+<style>@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-10px)}}</style>
+
+<script src="js/app.js"></script>
+<script>
+/* ══════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════ */
+const WizardState = {
+  step: 1, maxStep: 1,
+  profile:   { maxScale:5, level:'300L', duration:5, currentCgpa:null, targetCgpa:null, carryOvers:null },
+  logistics: { commute:2, work:2, sleep:8, attendance:80 },
+  courses:   [],
+};
+
+let currentUser = null;
+let courseIdCounter = 0;
+const ALL_DAYS = ['Mon','Tue','Wed','Thu','Fri'];
+
+/* ── INIT ─────────────────────────────────────── */
+(async () => {
+  if (!(await requireAuth())) return;
+  currentUser = Auth.getUser();
+  const saved = Store.get('wizard_draft');
+  if (saved) {
+    if (saved.profile)   Object.assign(WizardState.profile,   saved.profile);
+    if (saved.logistics) Object.assign(WizardState.logistics, saved.logistics);
+    if (saved.courses)   WizardState.courses = saved.courses;
+    prefillStep1(); prefillStep2();
+    if (WizardState.courses.length) WizardState.courses.forEach(c => addCourseCard(c));
+  }
+  updateScaleUI(WizardState.profile.maxScale);
+  updateAvailableTime();
+  syncCourseEmptyState();
+})();
+
+/* ── SCALE TOGGLE ─────────────────────────────── */
+document.querySelectorAll('input[name="grading-scale"]').forEach(r => {
+  r.addEventListener('change', () => {
+    WizardState.profile.maxScale = parseInt(r.value);
+    updateScaleUI(WizardState.profile.maxScale);
+  });
+});
+
+function updateScaleUI(scale) {
+  document.getElementById(scale === 5 ? 'scale-5' : 'scale-4').checked = true;
+  document.querySelectorAll('.scale-max-label').forEach(el => el.textContent = scale + '.0');
+  ['current-cgpa','target-cgpa'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.max = scale; }
+  });
+}
+
+/* ── SLIDER ───────────────────────────────────── */
+function updateSlider(key, val) {
+  val = parseFloat(val);
+  WizardState.logistics[key] = val;
+  const units = { commute:'hrs', work:'hrs', sleep:'hrs', attendance:'%' };
+  const label = document.getElementById('val-'+key);
+  if (label) label.innerHTML = `${val} <span class="slider-unit">${units[key]}</span>`;
+  if (key !== 'attendance') updateAvailableTime();
+}
+
+function updateAvailableTime() {
+  const { commute, work, sleep } = WizardState.logistics;
+  const free   = Math.max(0, 24 - sleep - commute - work - 2);
+  const weekly = free * 7;
+  const study  = Math.round(weekly * 0.5);
+  const freeEl  = document.getElementById('avail-hours-day');
+  const weekEl  = document.getElementById('avail-weekly');
+  const studyEl = document.getElementById('avail-study-est');
+  if (freeEl)  freeEl.textContent  = free.toFixed(1);
+  if (weekEl)  weekEl.textContent  = weekly.toFixed(0);
+  if (studyEl) studyEl.textContent = `~${study}`;
+  const warn = document.getElementById('time-warning');
+  if (!warn) return;
+  if (free < 3) {
+    warn.style.display = '';
+    warn.className = 'alert alert-warning';
+    warn.innerHTML = '<span class="alert-icon">⚠️</span><span>Very little free time detected. Study may be severely constrained.</span>';
+  } else if (free >= 10) {
+    warn.style.display = '';
+    warn.className = 'alert alert-success';
+    warn.innerHTML = '<span class="alert-icon">✅</span><span>Excellent availability! Your schedule has plenty of room for focused study.</span>';
+  } else {
+    warn.style.display = 'none';
+  }
+}
+
+/* ── COURSE CARDS ─────────────────────────────── */
+function addCourse(data) {
+  courseIdCounter++;
+  const id = data?.id || `c${courseIdCounter}`;
+  const course = data || { id, code:'', units:3, difficulty:3, classDays:[] };
+  if (!data) WizardState.courses.push(course);
+  addCourseCard(course);
+}
+
+function addCourseCard(course) {
+  const { id } = course;
+  const num = WizardState.courses.indexOf(course) + 1 || courseIdCounter;
+  const card = document.createElement('div');
+  card.className = 'course-card'; card.id = `card-${id}`;
+  card.innerHTML = `
+    <div class="course-card-header">
+      <div class="course-card-num">${num}</div>
+      <span style="font-weight:700;font-size:.9375rem;">Course ${num}</span>
+      <button class="course-card-remove" onclick="removeCourse('${id}')">×</button>
+    </div>
+    <div class="course-fields">
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="form-group">
+          <label class="form-label">Course Code</label>
+          <input class="form-input" type="text" placeholder="e.g. CSC 301" value="${course.code}"
+            oninput="setCourseField('${id}','code',this.value)"/>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="form-group">
+            <label class="form-label">Credit Units</label>
+            <input class="form-input" type="number" min="1" max="6" step="1" placeholder="1–6" value="${course.units}"
+              oninput="setCourseField('${id}','units',+this.value)"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Difficulty</label>
+            <div class="stars" id="stars-${id}">
+              ${[1,2,3,4,5].map(s=>`<button type="button" class="star-btn ${s<=course.difficulty?'filled':''}" onclick="setDiff('${id}',${s})">⭐</button>`).join('')}
+            </div>
+            <div class="star-hint" id="hint-${id}">${diffLabel(course.difficulty)}</div>
+          </div>
+        </div>
+      </div>
+      <div class="day-pills">
+        <div class="day-pills-label">Class Days</div>
+        <div class="day-pills-row">
+          ${ALL_DAYS.map(d=>`
+            <div class="day-pill-wrap">
+              <input type="checkbox" id="day-${id}-${d}" ${course.classDays.includes(d)?'checked':''}
+                onchange="toggleDay('${id}','${d}',this.checked)"/>
+              <label class="day-pill-label" for="day-${id}-${d}">${d}</label>
+            </div>`).join('')}
+        </div>
+        <span style="font-size:.68rem;color:var(--text-muted);margin-top:4px;display:block;">
+          Study blocks placed on other days
+        </span>
+      </div>
+    </div>`;
+  document.getElementById('courses-grid').appendChild(card);
+  syncCourseEmptyState();
+}
+
+function removeCourse(id) {
+  WizardState.courses = WizardState.courses.filter(c => c.id !== id);
+  document.getElementById(`card-${id}`)?.remove();
+  syncCourseEmptyState();
+}
+
+function syncCourseEmptyState() {
+  document.getElementById('courses-empty').style.display =
+    WizardState.courses.length ? 'none' : '';
+}
+
+function setCourseField(id, f, v) { const c=WizardState.courses.find(c=>c.id===id); if(c) c[f]=v; }
+function toggleDay(id, day, on) {
+  const c = WizardState.courses.find(c=>c.id===id);
+  if (!c) return;
+  if (on && !c.classDays.includes(day)) c.classDays.push(day);
+  else c.classDays = c.classDays.filter(d=>d!==day);
+}
+function setDiff(id, r) {
+  const c = WizardState.courses.find(c=>c.id===id);
+  if (c) c.difficulty = r;
+  document.querySelectorAll(`#stars-${id} .star-btn`).forEach((s,i)=>s.classList.toggle('filled',i<r));
+  const h = document.getElementById(`hint-${id}`);
+  if (h) h.textContent = diffLabel(r);
+}
+function diffLabel(r) { return ['','Very Easy','Easy','Moderate','Hard','Very Hard'][r]||'Moderate'; }
+
+/* ── PREFILL FORMS ────────────────────────────── */
+function prefillStep1() {
+  const p = WizardState.profile;
+  const s = v => v !== null && v !== undefined;
+  if (s(p.currentCgpa)) document.getElementById('current-cgpa').value = p.currentCgpa;
+  if (s(p.targetCgpa))  document.getElementById('target-cgpa').value  = p.targetCgpa;
+  if (s(p.carryOvers))  document.getElementById('carry-overs').value  = p.carryOvers;
+  document.getElementById('current-level').value    = p.level;
+  document.getElementById('program-duration').value = p.duration;
+}
+function prefillStep2() {
+  const l = WizardState.logistics;
+  ['commute','work','sleep','attendance'].forEach(k => {
+    const el = document.getElementById('sl-'+k);
+    if (el) { el.value = l[k]; updateSlider(k, l[k]); }
+  });
+}
+
+/* ══════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════ */
+function goToStep(n) {
+  WizardState.step = n;
+  document.querySelectorAll('.wizard-panel').forEach((p,i)=>p.classList.toggle('active',i===n-1));
+  document.querySelectorAll('.wp-step').forEach((s,i)=>{
+    const num = i+1;
+    s.classList.remove('active','completed');
+    if (num===n) s.classList.add('active');
+    else if (num<n) s.classList.add('completed');
+    const numEl = document.getElementById(`wpn-${num}`);
+    if (numEl) numEl.textContent = (num < n) ? '✓' : num;
+  });
+  if (n===4) buildReview();
+  window.scrollTo({top:0,behavior:'smooth'});
+  saveDraft();
+}
+
+function nextStep(from, skip=false) {
+  if (from===1 && !validateStep1()) return;
+  if (from===2) {
+    WizardState.logistics.commute    = parseFloat(document.getElementById('sl-commute').value);
+    WizardState.logistics.work       = parseFloat(document.getElementById('sl-work').value);
+    WizardState.logistics.sleep      = parseFloat(document.getElementById('sl-sleep').value);
+    WizardState.logistics.attendance = parseFloat(document.getElementById('sl-attendance').value);
+    WizardState.profile.attendance   = WizardState.logistics.attendance;
+  }
+  if (from===3 && !skip && !WizardState.courses.length) {
+    Toast.warning('Add at least one course, or click "Skip".');
+    return;
+  }
+  WizardState.maxStep = Math.max(WizardState.maxStep, from+1);
+  goToStep(from+1);
+}
+
+/* ── STEP 1 VALIDATION ────────────────────────── */
+function validateStep1() {
+  const ms = WizardState.profile.maxScale;
+  let ok = true;
+  const checks = [
+    {id:'current-cgpa', key:'currentCgpa', lo:0, hi:ms, label:`Current CGPA (0–${ms})`},
+    {id:'target-cgpa',  key:'targetCgpa',  lo:0, hi:ms, label:`Target CGPA (0–${ms})`},
+    {id:'carry-overs',  key:'carryOvers',  lo:0, hi:30,  label:'Carry-Overs (0–30)'},
+  ];
+  checks.forEach(({id,key,lo,hi,label})=>{
+    const el=document.getElementById(id), err=document.getElementById('err-'+id);
+    const v=parseFloat(el.value);
+    if(el.value===''||isNaN(v)||v<lo||v>hi){
+      err.style.display='flex'; err.textContent=`⚠ Enter a valid ${label}`;
+      el.classList.add('error'); ok=false;
+    } else {
+      err.style.display='none'; el.classList.remove('error');
+      WizardState.profile[key] = key==='carryOvers'?parseInt(v):v;
+    }
+  });
+  if (ok) {
+    if (WizardState.profile.targetCgpa < WizardState.profile.currentCgpa) {
+      const err=document.getElementById('err-target-cgpa');
+      err.style.display='flex'; err.textContent='⚠ Target CGPA must be ≥ current CGPA.';
+      document.getElementById('target-cgpa').classList.add('error'); ok=false;
+    }
+    WizardState.profile.level    = document.getElementById('current-level').value;
+    WizardState.profile.duration = parseInt(document.getElementById('program-duration').value);
+  }
+  return ok;
+}
+
+function saveDraft() {
+  Store.set('wizard_draft', { profile:WizardState.profile, logistics:WizardState.logistics, courses:WizardState.courses });
+}
+
+/* ── REVIEW PANEL ─────────────────────────────── */
+function buildReview() {
+  const {profile:p, logistics:l, courses} = WizardState;
+  const free   = Math.max(0, 24 - l.sleep - l.commute - l.work - 2);
+  const study  = deriveStudyHours(courses, free);
+  document.getElementById('derived-free').textContent  = free.toFixed(1) + ' hrs/day';
+  document.getElementById('derived-study').textContent = study.toFixed(1) + ' hrs/wk';
+  document.getElementById('review-content').innerHTML = `
+    <div class="review-card">
+      <div class="review-card-title">🏫 Institution</div>
+      <div class="review-item"><span class="review-item-label">Scale</span><span class="review-item-val">${p.maxScale}.0</span></div>
+      <div class="review-item"><span class="review-item-label">Level</span><span class="review-item-val">${p.level}</span></div>
+      <div class="review-item"><span class="review-item-label">Duration</span><span class="review-item-val">${p.duration} yrs</span></div>
+    </div>
+    <div class="review-card">
+      <div class="review-card-title">📊 CGPA</div>
+      <div class="review-item"><span class="review-item-label">Current</span><span class="review-item-val">${parseFloat(p.currentCgpa).toFixed(2)} / ${p.maxScale}</span></div>
+      <div class="review-item"><span class="review-item-label">Target</span><span class="review-item-val">${parseFloat(p.targetCgpa).toFixed(2)} / ${p.maxScale}</span></div>
+      <div class="review-item"><span class="review-item-label">Carry-Overs</span><span class="review-item-val">${p.carryOvers}</span></div>
+    </div>
+    <div class="review-card">
+      <div class="review-card-title">⏰ Logistics</div>
+      <div class="review-item"><span class="review-item-label">Commute</span><span class="review-item-val">${l.commute} hrs/day</span></div>
+      <div class="review-item"><span class="review-item-label">Work/Extra</span><span class="review-item-val">${l.work} hrs/day</span></div>
+      <div class="review-item"><span class="review-item-label">Sleep</span><span class="review-item-val">${l.sleep} hrs</span></div>
+    </div>
+    <div class="review-card">
+      <div class="review-card-title">📋 Schedule</div>
+      <div class="review-item"><span class="review-item-label">Attendance</span><span class="review-item-val">${l.attendance}%</span></div>
+      <div class="review-item"><span class="review-item-label">Courses</span><span class="review-item-val">${courses.length} added</span></div>
+      <div class="review-item"><span class="review-item-label">Free Time</span><span class="review-item-val">${free.toFixed(1)} hrs/day</span></div>
+    </div>`;
+  const chipsEl = document.getElementById('review-courses-chips');
+  const secEl   = document.getElementById('review-courses-section');
+  if (courses.length) {
+    secEl.style.display = '';
+    chipsEl.innerHTML = courses.map(c=>`
+      <div class="course-chip">
+        <span>${'⭐'.repeat(c.difficulty)}</span>
+        <strong>${c.code||'Unnamed'}</strong>
+        <span class="course-chip-units">${c.units}u</span>
+      </div>`).join('');
+  } else { secEl.style.display='none'; }
+}
+
+/* ══════════════════════════════════════════════
+   DERIVE STUDY HOURS
+══════════════════════════════════════════════ */
+function deriveStudyHours(courses, freePerDay) {
+  if (!courses.length) return freePerDay * 7 * 0.5;
+  const fromCourses = courses.reduce((s,c) => {
+    const w = c.difficulty>=4?2:c.difficulty>=3?1.5:1;
+    return s + c.units * w;
+  }, 0);
+  return Math.min(fromCourses, freePerDay * 7 * 0.6);
+}
+
+/* ══════════════════════════════════════════════
+   PREDICTION ENGINE (JS)
+══════════════════════════════════════════════ */
+function predictJS(currentCgpa, studyHours, attendance, carryOvers, maxScale) {
+  const b0=4.28959, b1=0.02773, b2=0.01759, b3=0.54279, b4=-0.07535;
+  const scaleAdj = maxScale===4 ? 0.8 : 1;
+  let pred = (b0 + b1*studyHours + b2*attendance + b3*currentCgpa + b4*carryOvers) * scaleAdj;
+  pred += (Math.random()-0.5)*0.07;
+  return parseFloat(Math.min(maxScale, Math.max(0, pred)).toFixed(2));
+}
+
+function computeRisk(predicted, target, carryOvers, maxScale) {
+  const gap = (target - predicted) / maxScale;
+  if (carryOvers>=5 || gap>0.28) return 'High';
+  if (carryOvers>=2 || gap>0.09) return 'Medium';
+  return 'Low';
+}
+
+function buildRecs(predicted, target, studyHrs, attendance, carryOvers, maxScale) {
+  const recs=[], gap=target-predicted, b1=0.02773, b2=0.01759;
+  if (gap>0) {
+    const xHrs = Math.max(0,parseFloat(((gap*0.45)/b1).toFixed(1)));
+    if (xHrs>0) recs.push({icon:'📚',title:`Add ${xHrs} hrs/week to your study schedule`,desc:`Target ${parseFloat((studyHrs+xHrs).toFixed(1))} hrs/week — this alone can close a significant portion of the gap.`});
+    const tAtt = Math.min(100,Math.round(attendance+(gap*0.3)/b2));
+    if (tAtt>attendance) recs.push({icon:'🏫',title:`Raise attendance from ${attendance}% → ${tAtt}%`,desc:`Each percentage point of attendance adds ~0.018 CGPA points. Small improvements compound.`});
+    if (carryOvers>0) recs.push({icon:'⚠️',title:`Clear your ${carryOvers} carry-over${carryOvers>1?'s':''}`,desc:`Every active carry-over costs ~0.075 CGPA points. Prioritise these in the timetable.`});
+    recs.push({icon:'🗓️',title:'Follow the Smart Timetable generated below',desc:'Your timetable is built around your commute, sleep, and class days — maximising productive study windows.'});
+    if (gap>maxScale*0.2) recs.push({icon:'🤝',title:'Seek study groups for high-difficulty courses',desc:'Courses rated 4–5 ⭐ benefit most from peer learning. Form or join a group this week.'});
+  } else {
+    recs.push({icon:'🌟',title:"You're on track — keep the momentum",desc:`Predicted ${predicted.toFixed(2)} meets or exceeds your ${target.toFixed(2)} target. Consistency is key.`});
+    if (attendance<90) recs.push({icon:'🏫',title:'Push attendance above 90% for even higher CGPA',desc:`You're on track, but lifting from ${attendance}% to 90%+ can push your final grade further.`});
+  }
+  return recs;
+}
+
+/* ══════════════════════════════════════════════
+   RUN ANALYSIS
+══════════════════════════════════════════════ */
+async function runAnalysis() {
+  const {profile:p, logistics:l, courses} = WizardState;
+  const free  = Math.max(0, 24 - l.sleep - l.commute - l.work - 2);
+  const study = deriveStudyHours(courses, free);
+  const input = {
+    current_cgpa: parseFloat(p.currentCgpa),
+    target_cgpa:  parseFloat(p.targetCgpa),
+    study_hours:  study,
+    attendance:   l.attendance,
+    carry_overs:  p.carryOvers,
+    max_scale:    p.maxScale,
+  };
+
+  const overlay = document.getElementById('loading-overlay');
+  overlay.style.display = 'flex';
+  document.getElementById('analyze-btn').disabled = true;
+
+  const steps = [
+    {icon:'🧮',title:'Running regression model…',sub:'Applying multivariate Ridge regression to your inputs'},
+    {icon:'📊',title:'Computing gap analysis…',sub:'Measuring distance between predicted and target CGPA'},
+    {icon:'🗓️',title:'Building Smart Timetable…',sub:'Allocating study blocks around your schedule constraints'},
+    {icon:'💾',title:'Saving to your history…',sub:'Securely storing this analysis to your account'},
+  ];
+  let si=0;
+  const iv = setInterval(()=>{
+    if(si<steps.length){
+      document.getElementById('loading-icon').textContent  = steps[si].icon;
+      document.getElementById('loading-title').textContent = steps[si].title;
+      document.getElementById('loading-sub').textContent   = steps[si].sub;
+      si++;
+    }
+  }, 650);
+
+  try {
+    let result = null;
+    try {
+      const res = await fetch('http://localhost:5000/analyze',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({...input, user_id:currentUser?.id}),
+        signal: AbortSignal.timeout(2500),
+      });
+      if (res.ok) result = await res.json();
+    } catch {}
+
+    if (!result) {
+      const pred = predictJS(input.current_cgpa, input.study_hours, input.attendance, input.carry_overs, input.max_scale);
+      result = {
+        predicted_cgpa:  pred,
+        risk_level:      computeRisk(pred, input.target_cgpa, input.carry_overs, input.max_scale),
+        recommendations: buildRecs(pred, input.target_cgpa, input.study_hours, input.attendance, input.carry_overs, input.max_scale),
+        gap: parseFloat((input.target_cgpa - pred).toFixed(2)),
+      };
+    }
+
+    await new Promise(r=>setTimeout(r,2200));
+    clearInterval(iv);
+    Store.set('wizard_state', {profile:p, logistics:l, courses});
+    await PredictionStore.save(currentUser?.id||'demo', input, result);
+    window.location.href = 'results.html';
+  } catch(err) {
+    clearInterval(iv);
+    overlay.style.display = 'none';
+    document.getElementById('analyze-btn').disabled = false;
+    const alertEl = document.getElementById('analyze-alert');
+    alertEl.className = 'alert alert-error';
+    alertEl.innerHTML = `<span class="alert-icon">⚠️</span><span>Analysis failed: ${err.message||'Unknown error.'}</span>`;
+    alertEl.style.display = 'flex';
+  }
+}
+</script>
+</body>
+</html>

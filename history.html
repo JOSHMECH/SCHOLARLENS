@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScholarLens — History</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <style>
+    .history-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .trend-card { padding: 28px; }
+    .table-card { padding: 0; overflow: hidden; }
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .table-title { font-family: var(--font-display); font-size: 1.125rem; font-weight: 700; }
+    .table-wrap  { overflow-x: auto; }
+
+    /* Stats row */
+    .history-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+    @media (max-width: 768px) { .history-stats { grid-template-columns: repeat(2,1fr); } }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: .85rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: all var(--transition);
+    }
+    .delete-btn:hover { background: #fee2e2; color: var(--red-500); }
+    [data-theme="dark"] .delete-btn:hover { background: rgba(239,68,68,.12); color: var(--red-400); }
+  </style>
+</head>
+<body>
+
+<!-- ── NAVBAR ───────────────────────────────────────────── -->
+<nav class="navbar">
+  <div class="container" style="max-width:100%;padding:0 24px;">
+    <div class="navbar-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">🎓</div>
+        Scholar<span>Lens</span>
+      </a>
+      <div class="nav-links">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="results.html"   class="nav-link">Results</a>
+        <a href="history.html"   class="nav-link active">History</a>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="theme-toggle">🌙</button>
+        <button data-action="logout" class="btn btn-secondary btn-sm">Log out</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container page-wrap">
+
+  <div class="page-header">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
+      <div>
+        <h1 class="page-title animate-slide-up">Analysis History</h1>
+        <p class="page-subtitle animate-slide-up delay-1">Track your academic progress over time.</p>
+      </div>
+      <div style="display:flex;gap:10px;" class="animate-fade-in delay-2">
+        <a href="dashboard.html" class="btn btn-primary btn-sm">+ New Analysis</a>
+        <button class="btn btn-secondary btn-sm" id="export-csv">⬇ Export CSV</button>
+        <button class="btn btn-danger btn-sm" id="clear-all" style="display:none;">🗑 Clear all</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary stats -->
+  <div class="history-stats animate-slide-up delay-2" id="history-stats">
+    <div class="stat-card">
+      <div class="stat-icon blue">📊</div>
+      <div class="stat-label">Total Analyses</div>
+      <div class="stat-value" id="stat-total">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">📈</div>
+      <div class="stat-label">Best Predicted</div>
+      <div class="stat-value" id="stat-best">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon amber">📉</div>
+      <div class="stat-label">Latest Predicted</div>
+      <div class="stat-value" id="stat-latest">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" id="stat-trend-icon" style="">🎯</div>
+      <div class="stat-label">Trend</div>
+      <div class="stat-value" id="stat-trend" style="font-size:1.25rem;">—</div>
+    </div>
+  </div>
+
+  <div class="history-layout">
+
+    <!-- Trend chart -->
+    <div class="card trend-card animate-slide-up delay-3" id="trend-card" style="display:none;">
+      <div style="font-family:var(--font-display);font-size:1.125rem;font-weight:700;margin-bottom:4px;">📈 Predicted CGPA Trend</div>
+      <div style="font-size:.8rem;color:var(--text-muted);margin-bottom:16px;">Your predicted CGPA across all analyses</div>
+      <div class="chart-wrap">
+        <canvas id="trend-chart"></canvas>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card table-card animate-slide-up delay-4">
+      <div class="table-header">
+        <div class="table-title">All Analyses</div>
+        <span class="badge badge-blue" id="total-count">0 records</span>
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty-state" id="empty-history" style="display:none;">
+        <div class="empty-icon">📭</div>
+        <div class="empty-title">No analyses yet</div>
+        <div class="empty-desc">Run your first analysis from the dashboard to start tracking your progress.</div>
+        <a href="dashboard.html" class="btn btn-primary" style="margin-top:8px;">Start analysing →</a>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap" id="table-wrap">
+        <table class="history-table" id="history-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Date</th>
+              <th>Current CGPA</th>
+              <th>Study Hrs</th>
+              <th>Attendance</th>
+              <th>Carry-Overs</th>
+              <th>Predicted CGPA</th>
+              <th>Target CGPA</th>
+              <th>Risk</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <!-- filled by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="js/app.js"></script>
+<script>
+let allHistory = [];
+let currentUser = null;
+let trendChartInst = null;
+
+(async () => {
+  if (!(await requireAuth())) return;
+  currentUser = Auth.getUser();
+  await loadHistory();
+})();
+
+async function loadHistory() {
+  allHistory = await PredictionStore.getHistory(currentUser?.id || 'demo');
+  render();
+}
+
+function render() {
+  const tbody   = document.getElementById('history-tbody');
+  const countEl = document.getElementById('total-count');
+  const empty   = document.getElementById('empty-history');
+  const tableWr = document.getElementById('table-wrap');
+  const clearBtn = document.getElementById('clear-all');
+
+  countEl.textContent = allHistory.length + ' record' + (allHistory.length !== 1 ? 's' : '');
+
+  if (!allHistory.length) {
+    empty.style.display = 'flex';
+    tableWr.style.display = 'none';
+    clearBtn.style.display = 'none';
+    // Stats
+    ['stat-total','stat-best','stat-latest','stat-trend'].forEach(id => {
+      document.getElementById(id).textContent = '—';
+    });
+    return;
+  }
+
+  empty.style.display = 'none';
+  tableWr.style.display = '';
+  clearBtn.style.display = '';
+
+  // Summary stats
+  const predicted = allHistory.map(r => parseFloat(r.predicted_cgpa));
+  document.getElementById('stat-total').textContent  = allHistory.length;
+  document.getElementById('stat-best').textContent   = Math.max(...predicted).toFixed(2);
+  document.getElementById('stat-latest').textContent = predicted[0].toFixed(2);
+
+  const trend = allHistory.length > 1 ? (predicted[0] - predicted[predicted.length-1]).toFixed(2) : null;
+  const trendEl = document.getElementById('stat-trend');
+  const trendIcon = document.getElementById('stat-trend-icon');
+  if (trend !== null) {
+    const up = parseFloat(trend) >= 0;
+    trendEl.textContent = (up ? '+' : '') + trend + ' pts';
+    trendEl.style.color = up ? 'var(--green-600)' : 'var(--red-500)';
+    trendIcon.textContent = up ? '📈' : '📉';
+    trendIcon.className = 'stat-icon ' + (up ? 'green' : 'red');
+  } else {
+    trendEl.textContent = 'Only 1 analysis';
+    trendEl.style.color = '';
+  }
+
+  // Table rows
+  tbody.innerHTML = allHistory.map((r, i) => {
+    const rColor = fmt.riskColor(r.risk_level);
+    const badgeClass = `badge badge-${rColor}`;
+    const riskDot = { Low:'🟢', Medium:'🟡', High:'🔴' }[r.risk_level] || '⚪';
+    const gapVal = parseFloat((r.target_cgpa - r.predicted_cgpa) || 0);
+    return `
+      <tr>
+        <td style="color:var(--text-muted);font-size:.8rem;">${allHistory.length - i}</td>
+        <td>
+          <div style="font-weight:500;">${fmt.date(r.created_at)}</div>
+          <div style="font-size:.75rem;color:var(--text-muted);">${fmt.time(r.created_at)}</div>
+        </td>
+        <td>${fmt.cgpa(r.current_cgpa)}</td>
+        <td>${r.study_hours} hrs</td>
+        <td>${r.attendance}%</td>
+        <td>${r.carry_overs}</td>
+        <td>
+          <span class="cgpa-pill">${fmt.cgpa(r.predicted_cgpa)}</span>
+          <div style="font-size:.7rem;color:${gapVal > 0 ? 'var(--red-500)' : 'var(--green-600)'};margin-top:3px;">
+            ${gapVal > 0 ? '▼ ' + gapVal.toFixed(2) + ' gap' : '✓ On target'}
+          </div>
+        </td>
+        <td>${fmt.cgpa(r.target_cgpa)}</td>
+        <td><span class="${badgeClass}">${riskDot} ${r.risk_level}</span></td>
+        <td>
+          <button class="delete-btn" onclick="deleteRecord('${r.id}')" title="Delete this record">🗑</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  // Trend chart
+  renderTrendChart();
+}
+
+function renderTrendChart() {
+  const card = document.getElementById('trend-card');
+  if (allHistory.length < 2) { card.style.display = 'none'; return; }
+  card.style.display = '';
+
+  const reversed = [...allHistory].reverse();
+  const labels   = reversed.map((r, i) => `Analysis ${i + 1}`);
+  const values   = reversed.map(r => parseFloat(r.predicted_cgpa));
+  const targets  = reversed.map(r => parseFloat(r.target_cgpa));
+
+  const isDark    = document.documentElement.dataset.theme === 'dark';
+  const textColor = isDark ? '#8b949e' : '#71717a';
+  const gridColor = isDark ? 'rgba(255,255,255,.07)' : 'rgba(0,0,0,.06)';
+
+  if (trendChartInst) { trendChartInst.destroy(); }
+  const ctx = document.getElementById('trend-chart').getContext('2d');
+  trendChartInst = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Predicted CGPA',
+          data: values,
+          borderColor: 'rgb(34,197,94)',
+          backgroundColor: 'rgba(34,197,94,.1)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 5,
+          pointBackgroundColor: 'rgb(34,197,94)',
+        },
+        {
+          label: 'Target CGPA',
+          data: targets,
+          borderColor: 'rgba(156,163,175,.8)',
+          backgroundColor: 'transparent',
+          borderDash: [6, 4],
+          tension: 0.4,
+          pointRadius: 4,
+          pointBackgroundColor: 'rgba(156,163,175,.8)',
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          min: 0, max: 5,
+          grid: { color: gridColor },
+          ticks: { color: textColor, font: { family: "'DM Sans',sans-serif", size: 11 } },
+        },
+        x: {
+          grid: { display: false },
+          ticks: { color: textColor, font: { family: "'DM Sans',sans-serif", size: 11 } },
+        },
+      },
+      plugins: {
+        legend: {
+          labels: { color: textColor, font: { family: "'DM Sans',sans-serif", size: 12 }, boxWidth: 12, boxHeight: 12 },
+        },
+        tooltip: {
+          backgroundColor: isDark ? '#1c2128' : '#fff',
+          borderColor: isDark ? '#30363d' : '#e2e8f0',
+          borderWidth: 1,
+          titleColor: isDark ? '#e6edf3' : '#0f1419',
+          bodyColor: isDark ? '#8b949e' : '#71717a',
+          padding: 12,
+          callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y.toFixed(2)}` },
+        },
+      },
+      animation: { duration: 800, easing: 'easeOutQuart' },
+    },
+  });
+}
+
+function deleteRecord(id) {
+  if (!confirm('Delete this analysis record?')) return;
+  const userId = currentUser?.id || 'demo';
+  const history = Store.get(`history_${userId}`, []);
+  const updated = history.filter(r => r.id !== id);
+  Store.set(`history_${userId}`, updated);
+  allHistory = updated;
+  render();
+  Toast.success('Record deleted.');
+}
+
+document.getElementById('clear-all').addEventListener('click', () => {
+  if (!confirm('Delete ALL analysis history? This cannot be undone.')) return;
+  const userId = currentUser?.id || 'demo';
+  Store.remove(`history_${userId}`);
+  Store.remove('last_result');
+  allHistory = [];
+  render();
+  Toast.warning('All history cleared.');
+});
+
+document.getElementById('export-csv').addEventListener('click', () => {
+  if (!allHistory.length) { Toast.warning('No history to export.'); return; }
+  const headers = ['Date','Current CGPA','Target CGPA','Study Hours','Attendance','Carry-Overs','Predicted CGPA','Risk Level'];
+  const rows = allHistory.map(r => [
+    fmt.date(r.created_at), r.current_cgpa, r.target_cgpa,
+    r.study_hours, r.attendance, r.carry_overs, r.predicted_cgpa, r.risk_level
+  ]);
+  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'scholarlens-history.csv' });
+  a.click();
+  Toast.success('Exported!');
+});
+</script>
+</body>
+</html>

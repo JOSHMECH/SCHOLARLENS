@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>ScholarLens — Results</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="container" style="max-width:100%;padding:0 24px;">
+    <div class="navbar-inner">
+      <a href="index.html" class="logo"><div class="logo-icon">🎓</div>Scholar<span>Lens</span></a>
+      <div class="nav-links">
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+        <a href="results.html"   class="nav-link active">Results</a>
+        <a href="history.html"   class="nav-link">History</a>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="theme-toggle">🌙</button>
+        <button data-action="logout" class="btn btn-secondary btn-sm">Log out</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container page-wrap">
+
+  <!-- No result state -->
+  <div id="no-result" class="empty-state" style="display:none;">
+    <div class="empty-icon">📊</div>
+    <div class="empty-title">No analysis yet</div>
+    <div class="empty-desc">Complete the wizard on the dashboard to see your results here.</div>
+    <a href="dashboard.html" class="btn btn-primary" style="margin-top:8px;">Go to Dashboard →</a>
+  </div>
+
+  <!-- Results -->
+  <div id="results-content">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
+        <div>
+          <h1 class="page-title animate-slide-up">Your Analysis Results</h1>
+          <p class="page-subtitle animate-slide-up delay-1" id="result-date">Analysed just now</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;" class="animate-fade-in delay-2">
+          <a href="dashboard.html" class="btn btn-secondary btn-sm">🔄 Re-analyse</a>
+          <a href="history.html"   class="btn btn-secondary btn-sm">📜 History</a>
+          <button class="btn btn-secondary btn-sm" onclick="window.print()">⬇️ Export PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contextual message -->
+    <div class="message-box green animate-slide-up delay-2" id="message-box">
+      <div class="message-box-icon" id="msg-icon">🎓</div>
+      <div>
+        <div class="message-box-title" id="msg-title">Loading…</div>
+        <div class="message-box-text"  id="msg-text"></div>
+      </div>
+    </div>
+
+    <!-- ════ TOP SECTION: Gauge + Right Panel ════ -->
+    <div class="results-top animate-slide-up delay-3">
+
+      <!-- LEFT: Gauge card -->
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div style="background:var(--bg2);border-bottom:1px solid var(--border);
+          padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-weight:700;font-size:.9375rem;">📊 CGPA Prediction</span>
+          <span class="badge badge-blue" id="scale-badge">5.0 Scale</span>
+        </div>
+        <div class="gauge-outer">
+          <!-- SVG gauge rendered by JS -->
+          <div class="gauge-svg-wrap" id="gauge-container"></div>
+          <!-- Zone legend -->
+          <div class="gauge-legend" id="gauge-legend"></div>
+        </div>
+
+        <!-- Risk level -->
+        <div style="padding:16px 20px;border-top:1px solid var(--border);text-align:center;">
+          <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;
+            letter-spacing:.06em;color:var(--text-muted);margin-bottom:8px;">Risk Level</div>
+          <div id="risk-badge-wrap"></div>
+          <div style="font-size:.8rem;color:var(--text-muted);margin-top:8px;" id="risk-desc"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Gap analysis + inputs summary + recs -->
+      <div style="display:flex;flex-direction:column;gap:20px;">
+
+        <!-- Gap analysis bars -->
+        <div class="card" style="padding:22px;">
+          <div style="font-weight:700;font-size:.9375rem;margin-bottom:18px;display:flex;align-items:center;gap:8px;">📏 Gap Analysis</div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="progress-wrap">
+              <div class="progress-header">
+                <span class="progress-label">Current CGPA</span>
+                <span class="progress-value" id="ga-current">—</span>
+              </div>
+              <div class="progress-track"><div class="progress-fill" id="ga-current-bar" style="width:0;"></div></div>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-header">
+                <span class="progress-label">Predicted CGPA</span>
+                <span class="progress-value" id="ga-predicted">—</span>
+              </div>
+              <div class="progress-track"><div class="progress-fill" id="ga-pred-bar" style="width:0;"></div></div>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress-header">
+                <span class="progress-label">Target CGPA</span>
+                <span class="progress-value" id="ga-target">—</span>
+              </div>
+              <div class="progress-track"><div class="progress-fill" id="ga-target-bar" style="width:0;background:linear-gradient(90deg,#a1a1aa,#d4d4d8);"></div></div>
+            </div>
+          </div>
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);
+            display:flex;justify-content:space-between;align-items:center;">
+            <span class="text-sm text-muted font-medium">Gap to target</span>
+            <span id="ga-gap" style="font-weight:700;font-size:1.125rem;"></span>
+          </div>
+        </div>
+
+        <!-- Input summary row -->
+        <div class="card" style="padding:18px;">
+          <div style="font-weight:700;font-size:.875rem;margin-bottom:12px;display:flex;align-items:center;gap:6px;">📋 Your Inputs Summary</div>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;" id="input-summary"></div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="card">
+          <div style="font-family:var(--font-display);font-size:1.125rem;font-weight:700;
+            margin-bottom:18px;display:flex;align-items:center;gap:8px;">🎯 Your Action Plan</div>
+          <div style="display:flex;flex-direction:column;gap:10px;" id="recs-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ SMART TIMETABLE ════ -->
+    <div class="card animate-slide-up delay-4" id="timetable-section" style="display:none;margin-top:24px;padding:0;overflow:hidden;">
+      <div style="background:var(--bg2);border-bottom:1px solid var(--border);padding:18px 22px;">
+        <div style="font-family:var(--font-display);font-size:1.25rem;font-weight:700;margin-bottom:4px;">
+          🗓️ Smart Weekly Study Timetable
+        </div>
+        <div style="font-size:.8rem;color:var(--text-muted);">
+          Auto-generated from your courses, commute, and schedule constraints. Study blocks avoid your class days.
+        </div>
+      </div>
+      <div style="padding:20px;">
+        <div class="timetable-wrap">
+          <div class="timetable" id="timetable-grid"></div>
+        </div>
+        <!-- Legend -->
+        <div class="tt-legend" id="tt-legend"></div>
+        <!-- Info note -->
+        <div class="alert alert-success" style="margin-top:14px;font-size:.8125rem;">
+          <span class="alert-icon">💡</span>
+          <span>Study blocks are placed on days <strong>different from</strong> your class days. Morning commute and work slots are reserved. Adjust your course class days in the wizard to regenerate.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- No timetable info (when no courses added) -->
+    <div class="card animate-slide-up delay-4" id="no-timetable" style="display:none;margin-top:24px;">
+      <div class="empty-state" style="padding:40px;">
+        <div class="empty-icon">🗓️</div>
+        <div class="empty-title">No timetable generated</div>
+        <div class="empty-desc">Add your courses in Step 3 of the wizard to get a personalised Smart Timetable.</div>
+        <a href="dashboard.html" class="btn btn-primary" style="margin-top:12px;">Add Courses →</a>
+      </div>
+    </div>
+
+  </div><!-- /results-content -->
+</div><!-- /container -->
+
+<div id="toast-container"></div>
+
+<script src="js/app.js"></script>
+<script>
+/* ══════════════════════════════════════════════════════════
+   GAUGE CONFIG
+══════════════════════════════════════════════════════════ */
+const ZONES_5 = [
+  { min:0,   max:2.0, color:'#ef4444', label:'Fail',        short:'Fail'     },
+  { min:2.0, max:2.5, color:'#f97316', label:'Pass',        short:'Pass'     },
+  { min:2.5, max:3.5, color:'#eab308', label:'2nd Class Lower', short:'2CL' },
+  { min:3.5, max:4.5, color:'#84cc16', label:'2nd Class Upper', short:'2CU' },
+  { min:4.5, max:5.0, color:'#22c55e', label:'First Class', short:'1st'     },
+];
+const ZONES_4 = [
+  { min:0,   max:1.0, color:'#ef4444', label:'Fail',          short:'Fail'   },
+  { min:1.0, max:2.0, color:'#f97316', label:'Pass',          short:'Pass'   },
+  { min:2.0, max:2.5, color:'#eab308', label:'Lower Credit',  short:'L.Cr'  },
+  { min:2.5, max:3.0, color:'#3b82f6', label:'Merit',         short:'Merit' },
+  { min:3.0, max:3.5, color:'#84cc16', label:'Upper Credit',  short:'U.Cr'  },
+  { min:3.5, max:4.0, color:'#22c55e', label:'Distinction',   short:'Dist.' },
+];
+
+function getZoneLabel(val, zones) {
+  return zones.find(z => val >= z.min && val <= z.max) || zones[zones.length-1];
+}
+
+/* ── BUILD GAUGE SVG ──────────────────────────────────── */
+function buildGauge(predicted, target, maxScale) {
+  const R=110, CX=155, CY=155;
+  const C = Math.PI * R; // semi-circle circumference
+  const zones = maxScale === 5 ? ZONES_5 : ZONES_4;
+  const arcPath = `M ${CX-R},${CY} A ${R},${R} 0 0,1 ${CX+R},${CY}`;
+
+  // Zone arcs
+  const zoneArcs = zones.map(z => {
+    const p1 = z.min/maxScale, p2 = z.max/maxScale;
+    const len = (p2-p1)*C, off = -p1*C;
+    return `<path d="${arcPath}" fill="none" stroke="${z.color}" stroke-width="22"
+      stroke-dasharray="${len.toFixed(3)} ${C.toFixed(3)}"
+      stroke-dashoffset="${off.toFixed(3)}" stroke-linecap="butt"/>`;
+  }).join('');
+
+  // Target marker (dashed tick)
+  const tPct  = Math.min(target/maxScale,1);
+  const tAng  = Math.PI - tPct*Math.PI; // from left (π) to right (0)
+  const tX = CX + (R+2)*Math.cos(tAng), tY = CY - (R+2)*Math.sin(tAng);
+  const tX2= CX + (R-26)*Math.cos(tAng), tY2= CY - (R-26)*Math.sin(tAng);
+
+  // Needle
+  const pPct = Math.min(predicted/maxScale,1);
+  const needleAngle = -90 + pPct*180; // -90 = left, 0 = up, +90 = right
+  const needleLen = R - 14;
+
+  // Current zone for colour
+  const zone = getZoneLabel(predicted, zones);
+  const isDark = document.documentElement.dataset.theme === 'dark';
+  const textFill = isDark ? '#e6edf3' : '#0f1419';
+  const mutedFill = isDark ? '#8b949e' : '#71717a';
+  const trackStroke = isDark ? '#30363d' : '#e5e7eb';
+
+  return `
+<svg viewBox="0 0 310 175" xmlns="http://www.w3.org/2000/svg">
+  <!-- Track -->
+  <path d="${arcPath}" fill="none" stroke="${trackStroke}" stroke-width="22" stroke-linecap="butt"/>
+  <!-- Zone arcs -->
+  ${zoneArcs}
+  <!-- Target marker -->
+  <line x1="${tX.toFixed(2)}" y1="${tY.toFixed(2)}" x2="${tX2.toFixed(2)}" y2="${tY2.toFixed(2)}"
+    stroke="#6b7280" stroke-width="2.5" stroke-dasharray="4 3" stroke-linecap="round"/>
+  <!-- Needle shadow -->
+  <line x1="${CX}" y1="${CY}" x2="${CX}" y2="${CY-needleLen}"
+    stroke="rgba(0,0,0,.12)" stroke-width="5" stroke-linecap="round"
+    transform="rotate(${needleAngle+1},${CX},${CY})"/>
+  <!-- Needle -->
+  <line class="gauge-needle" x1="${CX}" y1="${CY}" x2="${CX}" y2="${CY-needleLen}"
+    stroke="${textFill}" stroke-width="3" stroke-linecap="round"
+    transform="rotate(${needleAngle},${CX},${CY})"/>
+  <!-- Center dot -->
+  <circle cx="${CX}" cy="${CY}" r="7" fill="${textFill}"/>
+  <circle cx="${CX}" cy="${CY}" r="3.5" fill="${zone.color}"/>
+  <!-- Value -->
+  <text x="${CX}" y="${CY-36}" text-anchor="middle"
+    font-family="'Playfair Display',serif" font-size="30" font-weight="700"
+    fill="${zone.color}">${predicted.toFixed(2)}</text>
+  <text x="${CX}" y="${CY-15}" text-anchor="middle"
+    font-size="11" fill="${mutedFill}">/ ${maxScale}.0 scale</text>
+  <text x="${CX}" y="${CY+8}" text-anchor="middle"
+    font-size="12.5" font-weight="700" fill="${zone.color}">${zone.label}</text>
+  <!-- Target label -->
+  <text x="${(tX+tX2)/2+6}" y="${(tY+tY2)/2-4}" font-size="9" fill="${mutedFill}"
+    font-weight="600">TGT</text>
+</svg>`;
+}
+
+/* ══════════════════════════════════════════════════════════
+   TIMETABLE ALGORITHM
+══════════════════════════════════════════════════════════ */
+const DAYS_ALL  = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const START_HR  = 7;   // 7am
+const END_HR    = 22;  // 10pm
+const SLOTS     = END_HR - START_HR; // 15 slots
+
+const COURSE_PALETTE = [
+  { bg:'#dbeafe', border:'#3b82f6', text:'#1e40af', emoji:'📘' },
+  { bg:'#dcfce7', border:'#16a34a', text:'#14532d', emoji:'📗' },
+  { bg:'#fef3c7', border:'#d97706', text:'#78350f', emoji:'📙' },
+  { bg:'#fce7f3', border:'#db2777', text:'#831843', emoji:'📕' },
+  { bg:'#ede9fe', border:'#7c3aed', text:'#4c1d95', emoji:'📓' },
+  { bg:'#ffedd5', border:'#ea580c', text:'#7c2d12', emoji:'📔' },
+  { bg:'#e0f2fe', border:'#0284c7', text:'#0c4a6e', emoji:'📒' },
+  { bg:'#f0fdf4', border:'#15803d', text:'#052e16', emoji:'📖' },
+];
+
+function buildTimetable(courses, logistics) {
+  const { commute, work, sleep } = logistics;
+
+  // Initialise grid
+  const grid = {};
+  DAYS_ALL.forEach(d => {
+    grid[d] = Array.from({length:SLOTS}, () => ({type:'free'}));
+  });
+
+  // Wake offset: if sleep > 8 they might start later
+  const wakeOffset = Math.max(0, Math.floor((sleep - 8)));
+
+  // Morning commute: ceil(commute/2) slots starting after wakeOffset
+  const mComm = Math.ceil(commute / 2);
+  // Evening commute: floor(commute/2) slots near end
+  const eComm = Math.floor(commute / 2);
+
+  DAYS_ALL.forEach(day => {
+    const isWeekend = day==='Sat'||day==='Sun';
+
+    // Sleep buffer (very early morning)
+    for (let s=0; s<wakeOffset && s<SLOTS; s++) {
+      grid[day][s] = {type:'sleep', label:'😴 Rest'};
+    }
+
+    if (!isWeekend) {
+      // Morning commute
+      for (let s=wakeOffset; s<wakeOffset+mComm && s<SLOTS; s++) {
+        grid[day][s] = {type:'commute', label:'🚗 Commute'};
+      }
+      // Work/extracurricular (late afternoon: slot 9 = 4pm)
+      if (work > 0) {
+        const ws = 9;
+        for (let s=ws; s<ws+Math.min(work,5) && s<SLOTS-eComm; s++) {
+          if (grid[day][s].type==='free') grid[day][s] = {type:'work', label:'💼 Work/Extra'};
+        }
+      }
+      // Evening commute
+      if (eComm > 0) {
+        const es = SLOTS - eComm;
+        for (let s=Math.max(0,es); s<SLOTS; s++) {
+          if (grid[day][s].type==='free') grid[day][s] = {type:'commute', label:'🚗 Commute'};
+        }
+      }
+    }
+  });
+
+  // Sort courses by priority: difficulty * units (descending)
+  const sorted = [...courses]
+    .sort((a,b)=>(b.difficulty*b.units)-(a.difficulty*a.units))
+    .map((c,i)=>({...c, color: COURSE_PALETTE[i % COURSE_PALETTE.length]}));
+
+  // Allocate study blocks
+  sorted.forEach(course => {
+    if (course.difficulty < 2) return; // very easy: skip
+
+    const classDays = course.classDays || [];
+    // Target hours per week: difficulty * units * weight
+    const weight     = course.difficulty>=4 ? 2 : course.difficulty>=3 ? 1.5 : 1;
+    const targetHrs  = Math.round(course.units * weight);
+    // Study on non-class days
+    const studyDays  = DAYS_ALL.filter(d => !classDays.includes(d));
+
+    let placed = 0;
+    const maxPerDay = Math.max(1, Math.ceil(targetHrs / Math.max(1, studyDays.length)));
+
+    for (const day of studyDays) {
+      if (placed >= targetHrs) break;
+      let dayCount = 0;
+      // Start looking from slot after commute
+      const startSlot = Math.max(mComm + wakeOffset + 1, 1);
+      for (let s=startSlot; s<SLOTS && dayCount<maxPerDay && placed<targetHrs; s++) {
+        if (grid[day][s].type==='free') {
+          grid[day][s] = {
+            type: 'study',
+            label: course.code || 'Study',
+            color: course.color,
+            courseId: course.id,
+          };
+          dayCount++;
+          placed++;
+        }
+      }
+    }
+  });
+
+  return grid;
+}
+
+/* ── RENDER TIMETABLE ──────────────────────────────────── */
+function renderTimetable(grid, courses) {
+  const tt = document.getElementById('timetable-grid');
+  const hours = Array.from({length:SLOTS},(_,i)=>START_HR+i);
+
+  // Header row
+  tt.innerHTML = `<div class="tt-corner">TIME</div>
+    ${DAYS_ALL.map(d=>`<div class="tt-day-header ${d==='Sat'||d==='Sun'?'weekend':''}">${d}</div>`).join('')}`;
+
+  // Time rows
+  hours.forEach((hr,si) => {
+    const timeLabel = hr>=12 ? `${hr===12?12:hr-12}pm` : `${hr}am`;
+    tt.innerHTML += `<div class="tt-time">${timeLabel}</div>
+      ${DAYS_ALL.map(day => {
+        const cell = grid[day][si];
+        if (cell.type==='study') {
+          return `<div class="tt-cell study-block"
+            style="background:${cell.color.bg};border-left:3px solid ${cell.color.border};
+                   color:${cell.color.text};"
+            title="${cell.label} — Study Block">
+            <span class="tt-cell-label">${cell.label}</span>
+          </div>`;
+        }
+        if (cell.type==='commute') {
+          return `<div class="tt-cell commute-block" title="Commute">
+            <span class="tt-cell-label" style="font-size:.58rem;">🚗</span></div>`;
+        }
+        if (cell.type==='work') {
+          return `<div class="tt-cell work-block" title="Work / Extracurricular">
+            <span class="tt-cell-label" style="font-size:.58rem;">💼</span></div>`;
+        }
+        if (cell.type==='sleep') {
+          return `<div class="tt-cell sleep-block" title="Rest time">
+            <span class="tt-cell-label" style="font-size:.58rem;color:#94a3b8;">😴</span></div>`;
+        }
+        return `<div class="tt-cell free-block"></div>`;
+      }).join('')}`;
+  });
+
+  // Legend
+  const legendEl = document.getElementById('tt-legend');
+  const legendItems = [
+    {bg:'#fef9c3',border:'#ca8a04',text:'#78350f',label:'Commute'},
+    {bg:'#e0f2fe',border:'#0284c7',text:'#0c4a6e',label:'Work/Extra'},
+    {bg:'var(--card-bg)',border:'var(--border)',text:'var(--text-muted)',label:'Free Slot'},
+  ];
+  const courseItems = courses
+    .filter(c=>c.difficulty>=2)
+    .sort((a,b)=>(b.difficulty*b.units)-(a.difficulty*a.units))
+    .map((c,i)=>{
+      const col = COURSE_PALETTE[i % COURSE_PALETTE.length];
+      return {bg:col.bg, border:col.border, text:col.text, label: c.code||`Course ${i+1}`};
+    });
+
+  legendEl.innerHTML = [...courseItems, ...legendItems].map(item=>`
+    <div class="tt-legend-item">
+      <div class="tt-legend-swatch" style="background:${item.bg};border-left-color:${item.border};"></div>
+      <span style="color:var(--text-muted);">${item.label}</span>
+    </div>`).join('');
+}
+
+/* ══════════════════════════════════════════════════════════
+   PAGE INIT
+══════════════════════════════════════════════════════════ */
+(async () => {
+  if (!(await requireAuth())) return;
+
+  const lastResult = Store.get('last_result');
+  if (!lastResult) {
+    document.getElementById('no-result').style.display = 'flex';
+    document.getElementById('results-content').style.display = 'none';
+    return;
+  }
+
+  const wizardState = Store.get('wizard_state') || {};
+  const {input, result, timestamp} = lastResult;
+  const {predicted_cgpa, risk_level, recommendations, gap} = result;
+
+  const maxScale = wizardState?.profile?.maxScale || input.max_scale || 5;
+  const courses  = wizardState?.courses || [];
+  const logistics = wizardState?.logistics || { commute:2, work:2, sleep:8, attendance:80 };
+  const zones = maxScale===5 ? ZONES_5 : ZONES_4;
+
+  // Date
+  if (timestamp) {
+    document.getElementById('result-date').textContent =
+      'Analysed ' + fmt.date(timestamp) + ' at ' + fmt.time(timestamp);
+  }
+
+  // ── Scale badge ──────────────────────────────────────────
+  document.getElementById('scale-badge').textContent = `${maxScale}.0 Scale`;
+
+  // ── GAUGE ────────────────────────────────────────────────
+  document.getElementById('gauge-container').innerHTML =
+    buildGauge(predicted_cgpa, input.target_cgpa, maxScale);
+
+  // Zone legend
+  const legendEl = document.getElementById('gauge-legend');
+  legendEl.innerHTML = zones.map(z=>`
+    <div class="gauge-legend-item">
+      <div class="gauge-legend-dot" style="background:${z.color};"></div>
+      <span>${z.short} (${z.min}–${z.max})</span>
+    </div>`).join('');
+
+  // ── MESSAGE BOX ──────────────────────────────────────────
+  const box      = document.getElementById('message-box');
+  const msgIcon  = document.getElementById('msg-icon');
+  const msgTitle = document.getElementById('msg-title');
+  const msgText  = document.getElementById('msg-text');
+  const zone     = getZoneLabel(predicted_cgpa, zones);
+
+  if (risk_level==='Low' && predicted_cgpa >= input.target_cgpa) {
+    box.className = 'message-box green animate-slide-up delay-2';
+    msgIcon.textContent  = '🎉';
+    msgTitle.textContent = `${zone.label} — Target achieved!`;
+    msgText.textContent  = `Your predicted CGPA of ${fmt.cgpa(predicted_cgpa)} meets your target of ${fmt.cgpa(input.target_cgpa)}. You're in the ${zone.label} class on the ${maxScale}.0 scale. Keep this up!`;
+  } else if (risk_level==='Medium') {
+    box.className = 'message-box amber animate-slide-up delay-2';
+    msgIcon.textContent  = '⚠️';
+    msgTitle.textContent = `${zone.label} — Moderate effort needed`;
+    msgText.textContent  = `To reach your ${fmt.cgpa(input.target_cgpa)} target, you need to close a ${Math.abs(gap).toFixed(2)} point gap. Follow the action plan and Smart Timetable below.`;
+  } else if (risk_level==='High') {
+    box.className = 'message-box red animate-slide-up delay-2';
+    msgIcon.textContent  = '🚨';
+    msgTitle.textContent = `${zone.label} — Significant improvement needed`;
+    msgText.textContent  = `There is a ${Math.abs(gap).toFixed(2)} point gap between your prediction (${fmt.cgpa(predicted_cgpa)}) and your target (${fmt.cgpa(input.target_cgpa)}). Commit to the full action plan — it's achievable with focus.`;
+  } else {
+    box.className = 'message-box green animate-slide-up delay-2';
+    msgIcon.textContent  = '✅';
+    msgTitle.textContent = `${zone.label} — Close to target`;
+    msgText.textContent  = `A small gap of ${Math.abs(gap).toFixed(2)} points separates you from your target. Minor adjustments to study time or attendance will get you there.`;
+  }
+
+  // ── RISK BADGE ───────────────────────────────────────────
+  const rColors = {Low:'#16a34a',Medium:'#d97706',High:'#dc2626'};
+  const rBgs    = {Low:'var(--green-100)',Medium:'#fef3c7',High:'#fee2e2'};
+  const rTexts  = {Low:'var(--green-700)',Medium:'#92400e',High:'#991b1b'};
+  const rDescs  = {Low:'Academically stable.',Medium:'Focused improvement needed.',High:'Immediate action required.'};
+  document.getElementById('risk-badge-wrap').innerHTML = `
+    <div style="display:inline-flex;align-items:center;gap:8px;padding:8px 20px;
+      border-radius:999px;background:${rBgs[risk_level]};color:${rTexts[risk_level]};
+      font-weight:700;font-size:.95rem;">
+      <span style="width:10px;height:10px;border-radius:50%;background:${rColors[risk_level]};
+        animation:pulse-dot 2s infinite;display:inline-block;"></span>
+      ${risk_level} Risk
+    </div>`;
+  document.getElementById('risk-desc').textContent = rDescs[risk_level]||'';
+
+  // ── GAP BARS ─────────────────────────────────────────────
+  const maxS = maxScale;
+  document.getElementById('ga-current').textContent   = fmt.cgpa(input.current_cgpa);
+  document.getElementById('ga-predicted').textContent = fmt.cgpa(predicted_cgpa);
+  document.getElementById('ga-target').textContent    = fmt.cgpa(input.target_cgpa);
+  const predColor = fmt.progressColor(predicted_cgpa, input.target_cgpa);
+  setTimeout(()=>{
+    document.getElementById('ga-current-bar').style.width = (input.current_cgpa/maxS*100)+'%';
+    document.getElementById('ga-pred-bar').style.width    = (predicted_cgpa/maxS*100)+'%';
+    document.getElementById('ga-target-bar').style.width  = (input.target_cgpa/maxS*100)+'%';
+    document.getElementById('ga-pred-bar').className = `progress-fill ${predColor}`;
+  }, 350);
+  const gapEl  = document.getElementById('ga-gap');
+  const gapVal = input.target_cgpa - predicted_cgpa;
+  gapEl.textContent = gapVal <= 0
+    ? `+${Math.abs(gapVal).toFixed(2)} above target ✅`
+    : `${gapVal.toFixed(2)} below target`;
+  gapEl.style.color = gapVal<=0 ? 'var(--green-600)' : gapVal<=0.3 ? 'var(--amber-500)' : 'var(--red-500)';
+
+  // ── INPUT SUMMARY ────────────────────────────────────────
+  const summaryItems = [
+    {icon:'📚',label:'Current',val:fmt.cgpa(input.current_cgpa)},
+    {icon:'🎯',label:'Target', val:fmt.cgpa(input.target_cgpa)},
+    {icon:'⏰',label:'Study',  val:(input.study_hours||0).toFixed(1)+'h/wk'},
+    {icon:'🏫',label:'Attend.', val:input.attendance+'%'},
+    {icon:'📋',label:'Carry-Overs', val:input.carry_overs},
+  ];
+  document.getElementById('input-summary').innerHTML = summaryItems.map(it=>`
+    <div style="text-align:center;padding:10px 6px;background:var(--bg2);
+      border:1px solid var(--border);border-radius:var(--radius-md);">
+      <div style="font-size:1.1rem;margin-bottom:4px;">${it.icon}</div>
+      <div style="font-size:.65rem;font-weight:600;color:var(--text-muted);
+        text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">${it.label}</div>
+      <div style="font-weight:700;font-size:.875rem;">${it.val}</div>
+    </div>`).join('');
+
+  // ── RECOMMENDATIONS ──────────────────────────────────────
+  document.getElementById('recs-list').innerHTML = (recommendations||[]).map((r,i)=>`
+    <div class="rec-item animate-slide-up" style="animation-delay:${i*0.08}s;">
+      <div class="rec-icon">${r.icon||'💡'}</div>
+      <div class="rec-text">
+        <div class="rec-title">${r.title}</div>
+        <div class="rec-desc">${r.desc}</div>
+      </div>
+    </div>`).join('');
+
+  // ── SMART TIMETABLE ──────────────────────────────────────
+  if (courses.length > 0) {
+    document.getElementById('timetable-section').style.display = '';
+    document.getElementById('no-timetable').style.display = 'none';
+    const grid = buildTimetable(courses, logistics);
+    renderTimetable(grid, courses);
+  } else {
+    document.getElementById('timetable-section').style.display = 'none';
+    document.getElementById('no-timetable').style.display = '';
+  }
+})();
+</script>
+<style>
+@keyframes pulse-dot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.7}}
+</style>
+</body>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScholarLens — Sign In / Register</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .auth-page {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 100vh;
+    }
+    @media (max-width: 768px) {
+      .auth-page { grid-template-columns: 1fr; }
+      .auth-hero   { display: none; }
+    }
+
+    /* Left panel — brand/hero */
+    .auth-hero {
+      background: linear-gradient(160deg, var(--green-700) 0%, var(--green-500) 50%, #34d399 100%);
+      padding: 60px 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .auth-hero::before {
+      content: '';
+      position: absolute;
+      bottom: -80px; left: -80px;
+      width: 400px; height: 400px;
+      background: rgba(255,255,255,.07);
+      border-radius: 50%;
+    }
+    .auth-hero::after {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 300px; height: 300px;
+      background: rgba(255,255,255,.05);
+      border-radius: 50%;
+    }
+    .auth-hero-logo { font-family: var(--font-display); font-size: 1.75rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .auth-hero-logo .logo-icon { background: rgba(255,255,255,.2); box-shadow: 0 4px 12px rgba(0,0,0,.15); }
+    .auth-hero-body { z-index: 1; }
+    .auth-hero-title { font-family: var(--font-display); font-size: 2.5rem; font-weight: 900; line-height: 1.15; margin-bottom: 16px; }
+    .auth-hero-desc { opacity: .85; font-size: 1rem; line-height: 1.65; max-width: 360px; }
+    .auth-hero-badges { display: flex; flex-direction: column; gap: 14px; margin-top: 36px; }
+    .auth-hero-badge { display: flex; align-items: center; gap: 12px; }
+    .auth-hero-badge-icon { width: 36px; height: 36px; background: rgba(255,255,255,.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+    .auth-hero-badge-text { font-size: .875rem; opacity: .9; font-weight: 500; }
+    .auth-hero-footer { font-size: .8rem; opacity: .65; z-index: 1; }
+
+    /* Right panel — form */
+    .auth-form-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 48px 40px;
+      background: var(--bg);
+    }
+    .auth-form-wrap { width: 100%; max-width: 420px; }
+    .auth-tabs { margin-bottom: 32px; }
+    .auth-header { margin-bottom: 32px; }
+    .auth-title { font-family: var(--font-display); font-size: 1.875rem; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+    .auth-subtitle { color: var(--text-muted); font-size: .9rem; }
+    .auth-divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 20px 0;
+      color: var(--text-muted); font-size: .8rem;
+    }
+    .auth-divider::before, .auth-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+    .auth-footer-link { text-align: center; margin-top: 20px; font-size: .875rem; color: var(--text-muted); }
+    .auth-footer-link a { color: var(--green-600); font-weight: 600; }
+
+    /* Password strength */
+    .pw-strength { margin-top: 6px; }
+    .pw-strength-bars { display: flex; gap: 4px; }
+    .pw-bar { flex: 1; height: 4px; border-radius: 2px; background: var(--border); transition: background .3s; }
+    .pw-label { font-size: .75rem; margin-top: 4px; font-weight: 500; }
+    .strength-0 .pw-bar { background: var(--border); }
+    .strength-1 .pw-bar:nth-child(1) { background: var(--red-400); }
+    .strength-2 .pw-bar:nth-child(1), .strength-2 .pw-bar:nth-child(2) { background: var(--amber-400); }
+    .strength-3 .pw-bar:nth-child(1), .strength-3 .pw-bar:nth-child(2), .strength-3 .pw-bar:nth-child(3) { background: var(--green-400); }
+    .strength-4 .pw-bar { background: var(--green-500); }
+
+    /* Demo mode banner */
+    .demo-banner {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      font-size: .8125rem;
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    [data-theme="dark"] .demo-banner { background: rgba(245,158,11,.08); border-color: rgba(245,158,11,.2); color: var(--amber-400); }
+
+    .top-bar {
+      position: absolute; top: 20px; right: 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="index.html" class="btn btn-ghost btn-sm" style="color:var(--text-muted);">← Back to home</a>
+  <button class="theme-toggle">🌙</button>
+</div>
+
+<div class="auth-page">
+  <!-- ── LEFT: Brand panel ─────────────────────── -->
+  <div class="auth-hero">
+    <div class="auth-hero-logo">
+      <div class="logo-icon">🎓</div>
+      ScholarLens
+    </div>
+
+    <div class="auth-hero-body">
+      <h2 class="auth-hero-title">Your grades,<br/>predicted.</h2>
+      <p class="auth-hero-desc">
+        Enter your academic stats and get a data-driven prediction
+        of your CGPA plus a personalised study roadmap.
+      </p>
+      <div class="auth-hero-badges">
+        <div class="auth-hero-badge">
+          <div class="auth-hero-badge-icon">🧮</div>
+          <div class="auth-hero-badge-text">ML-powered multivariate regression</div>
+        </div>
+        <div class="auth-hero-badge">
+          <div class="auth-hero-badge-icon">📊</div>
+          <div class="auth-hero-badge-text">Instant CGPA prediction &amp; risk analysis</div>
+        </div>
+        <div class="auth-hero-badge">
+          <div class="auth-hero-badge-icon">🎯</div>
+          <div class="auth-hero-badge-text">Personalised study recommendations</div>
+        </div>
+        <div class="auth-hero-badge">
+          <div class="auth-hero-badge-icon">🔒</div>
+          <div class="auth-hero-badge-text">Secured by Supabase auth</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-hero-footer">
+      © 2025 ScholarLens. All rights reserved.
+    </div>
+  </div>
+
+  <!-- ── RIGHT: Form panel ─────────────────────── -->
+  <div class="auth-form-panel">
+    <div class="auth-form-wrap">
+
+      <!-- Demo mode notice -->
+      <div class="demo-banner" id="demo-banner">
+        ⚠️ <span><strong>Demo mode:</strong> Supabase not configured — your data is stored locally in this browser.</span>
+      </div>
+
+      <!-- Tab switcher -->
+      <div class="auth-tabs tabs">
+        <button class="tab-btn" id="tab-login" onclick="switchTab('login')">Log in</button>
+        <button class="tab-btn" id="tab-register" onclick="switchTab('register')">Create account</button>
+      </div>
+
+      <!-- ── LOGIN FORM ───────────────────────── -->
+      <div id="form-login">
+        <div class="auth-header">
+          <h1 class="auth-title">Welcome back</h1>
+          <p class="auth-subtitle">Sign in to your ScholarLens account.</p>
+        </div>
+        <form id="login-form" novalidate>
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div class="form-group">
+              <label class="form-label" for="login-email">Email address</label>
+              <input class="form-input" type="email" id="login-email" placeholder="you@university.edu" autocomplete="email" required />
+              <span class="form-error" id="login-email-err" style="display:none;">⚠ Please enter a valid email.</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="login-password">Password</label>
+              <input class="form-input" type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" required />
+              <span class="form-error" id="login-pw-err" style="display:none;">⚠ Password is required.</span>
+            </div>
+            <div id="login-alert" style="display:none;"></div>
+            <button type="submit" class="btn btn-primary btn-full" id="login-btn">
+              Sign in
+            </button>
+          </div>
+        </form>
+        <div class="auth-footer-link">
+          No account? <a href="#" onclick="switchTab('register'); return false;">Create one free</a>
+        </div>
+      </div>
+
+      <!-- ── REGISTER FORM ─────────────────────── -->
+      <div id="form-register" style="display:none;">
+        <div class="auth-header">
+          <h1 class="auth-title">Get started free</h1>
+          <p class="auth-subtitle">Create your ScholarLens account in seconds.</p>
+        </div>
+        <form id="register-form" novalidate>
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div class="form-group">
+              <label class="form-label" for="reg-name">Full name</label>
+              <input class="form-input" type="text" id="reg-name" placeholder="Chukwuemeka Obi" autocomplete="name" required />
+              <span class="form-error" id="reg-name-err" style="display:none;">⚠ Please enter your name.</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="reg-email">Email address</label>
+              <input class="form-input" type="email" id="reg-email" placeholder="you@university.edu" autocomplete="email" required />
+              <span class="form-error" id="reg-email-err" style="display:none;">⚠ Please enter a valid email.</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="reg-pw">Password</label>
+              <input class="form-input" type="password" id="reg-pw" placeholder="At least 8 characters" autocomplete="new-password" required />
+              <div class="pw-strength" id="pw-strength-wrap">
+                <div class="pw-strength-bars">
+                  <div class="pw-bar"></div>
+                  <div class="pw-bar"></div>
+                  <div class="pw-bar"></div>
+                  <div class="pw-bar"></div>
+                </div>
+                <div class="pw-label text-muted" id="pw-label">Enter a password</div>
+              </div>
+              <span class="form-error" id="reg-pw-err" style="display:none;">⚠ Password must be at least 8 characters.</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="reg-pw2">Confirm password</label>
+              <input class="form-input" type="password" id="reg-pw2" placeholder="Repeat password" autocomplete="new-password" required />
+              <span class="form-error" id="reg-pw2-err" style="display:none;">⚠ Passwords do not match.</span>
+            </div>
+            <div id="reg-alert" style="display:none;"></div>
+            <button type="submit" class="btn btn-primary btn-full" id="reg-btn">
+              Create account
+            </button>
+          </div>
+        </form>
+        <div class="auth-footer-link">
+          Already have an account? <a href="#" onclick="switchTab('login'); return false;">Sign in</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="js/app.js"></script>
+<script>
+  // ── INIT ─────────────────────────────────────────────────
+  (async () => {
+    await Auth.init();
+    if (Auth.isAuthenticated()) {
+      window.location.href = 'dashboard.html';
+      return;
+    }
+    // Check URL for mode
+    const mode = new URLSearchParams(window.location.search).get('mode');
+    switchTab(mode === 'register' ? 'register' : 'login');
+    // Hide demo banner if Supabase configured
+    if (window.SUPABASE_URL && window.SUPABASE_URL !== 'https://your-project.supabase.co') {
+      document.getElementById('demo-banner').style.display = 'none';
+    }
+  })();
+
+  // ── TAB SWITCHER ──────────────────────────────────────────
+  function switchTab(tab) {
+    document.getElementById('form-login').style.display    = tab === 'login'    ? '' : 'none';
+    document.getElementById('form-register').style.display = tab === 'register' ? '' : 'none';
+    document.getElementById('tab-login').classList.toggle('active',    tab === 'login');
+    document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+    // Update URL
+    const url = new URL(window.location);
+    url.searchParams.set('mode', tab);
+    history.replaceState({}, '', url);
+  }
+
+  // ── PASSWORD STRENGTH ─────────────────────────────────────
+  document.getElementById('reg-pw').addEventListener('input', function () {
+    const val = this.value;
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    const wrap = document.getElementById('pw-strength-wrap');
+    wrap.className = `pw-strength strength-${score}`;
+    const labels = ['', 'Too weak', 'Fair', 'Good', 'Strong'];
+    const colors = ['var(--text-muted)', 'var(--red-500)', 'var(--amber-500)', 'var(--green-500)', 'var(--green-600)'];
+    const label = document.getElementById('pw-label');
+    label.textContent = val ? labels[score] || 'Strong' : 'Enter a password';
+    label.style.color = val ? colors[score] : '';
+  });
+
+  // ── HELPERS ───────────────────────────────────────────────
+  function showAlert(id, msg, type = 'error') {
+    const el = document.getElementById(id);
+    el.className = `alert alert-${type}`;
+    el.innerHTML = `<span class="alert-icon">${type === 'error' ? '⚠️' : '✅'}</span><span>${msg}</span>`;
+    el.style.display = 'flex';
+  }
+  function hideAlert(id) { document.getElementById(id).style.display = 'none'; }
+  function setLoading(btnId, loading, text = '') {
+    const btn = document.getElementById(btnId);
+    if (loading) {
+      btn.disabled = true;
+      btn.innerHTML = `<div class="spinner"></div> ${text}`;
+    } else {
+      btn.disabled = false;
+      btn.textContent = text;
+    }
+  }
+  function fieldError(id, show, msg = '') {
+    const el = document.getElementById(id);
+    const input = document.getElementById(id.replace('-err', ''));
+    el.style.display = show ? 'flex' : 'none';
+    if (msg) el.textContent = '⚠ ' + msg;
+    if (input) input.classList.toggle('error', show);
+  }
+
+  // ── LOGIN ─────────────────────────────────────────────────
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideAlert('login-alert');
+    const email = document.getElementById('login-email').value.trim();
+    const pw    = document.getElementById('login-password').value;
+    let valid = true;
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      fieldError('login-email-err', true); valid = false;
+    } else { fieldError('login-email-err', false); }
+    if (!pw) { fieldError('login-pw-err', true); valid = false; }
+    else      { fieldError('login-pw-err', false); }
+    if (!valid) return;
+
+    setLoading('login-btn', true, 'Signing in…');
+    try {
+      await Auth.signIn(email, pw);
+      Toast.success('Welcome back! Redirecting…');
+      setTimeout(() => window.location.href = 'dashboard.html', 800);
+    } catch (err) {
+      showAlert('login-alert', err.message || 'Login failed. Please try again.');
+    } finally {
+      setLoading('login-btn', false, 'Sign in');
+    }
+  });
+
+  // ── REGISTER ──────────────────────────────────────────────
+  document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideAlert('reg-alert');
+    const name  = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const pw    = document.getElementById('reg-pw').value;
+    const pw2   = document.getElementById('reg-pw2').value;
+    let valid = true;
+
+    if (!name) { fieldError('reg-name-err', true, 'Please enter your name.'); valid = false; }
+    else        { fieldError('reg-name-err', false); }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      fieldError('reg-email-err', true, 'Please enter a valid email.'); valid = false;
+    } else { fieldError('reg-email-err', false); }
+    if (!pw || pw.length < 8) { fieldError('reg-pw-err', true, 'Password must be at least 8 characters.'); valid = false; }
+    else                      { fieldError('reg-pw-err', false); }
+    if (pw !== pw2) { fieldError('reg-pw2-err', true, 'Passwords do not match.'); valid = false; }
+    else            { fieldError('reg-pw2-err', false); }
+    if (!valid) return;
+
+    setLoading('reg-btn', true, 'Creating account…');
+    try {
+      await Auth.signUp(email, pw, name);
+      Toast.success('Account created! Welcome to ScholarLens 🎓');
+      setTimeout(() => window.location.href = 'dashboard.html', 800);
+    } catch (err) {
+      showAlert('reg-alert', err.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading('reg-btn', false, 'Create account');
+    }
+  });
+</script>
+</body>
+</html>
