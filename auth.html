@@ -267,21 +267,29 @@
 
 <script src="js/app.js"></script>
 <script>
-  // ── INIT ─────────────────────────────────────────────────
-  (async () => {
-    await Auth.init();
-    if (Auth.isAuthenticated()) {
-      window.location.href = 'dashboard.html';
-      return;
-    }
-    // Check URL for mode
-    const mode = new URLSearchParams(window.location.search).get('mode');
-    switchTab(mode === 'register' ? 'register' : 'login');
-    // Hide demo banner if Supabase configured
-    if (window.SUPABASE_URL && window.SUPABASE_URL !== 'https://vkxbxjrddejjfavcrmjl.supabase.co') {
-      document.getElementById('demo-banner').style.display = 'none';
-    }
-  })();
+ (async () => {
+  const supabase = initSupabase();
+
+  // Get current session (works without signing in again)
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (session) {
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  // Check URL for mode
+  const mode = new URLSearchParams(window.location.search).get('mode');
+  switchTab(mode === 'register' ? 'register' : 'login');
+
+  // Hide demo banner if Supabase configured
+  if (
+    window.SUPABASE_URL &&
+    window.SUPABASE_URL !== 'https://vkxbxjrddejjfavcrmjl.supabase.co'
+  ) {
+    document.getElementById('demo-banner').style.display = 'none';
+  }
+})();
 
   // ── TAB SWITCHER ──────────────────────────────────────────
   function switchTab(tab) {
