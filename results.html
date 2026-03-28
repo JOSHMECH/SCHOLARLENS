@@ -12,7 +12,7 @@
 <nav class="navbar">
   <div class="container" style="max-width:100%;padding:0 24px;">
     <div class="navbar-inner">
-      <a href="index.html" class="logo"><div class="logo-icon">🎓</div>Scholar<span>Lens</span></a>
+      <a href="index.html" class="logo"><div class="logo-icon"><img src="img/white logo.png" alt=""></div>Scholar<span>Lens</span></a>
       <div class="nav-links">
         <a href="dashboard.html" class="nav-link">Dashboard</a>
         <a href="results.html"   class="nav-link active">Results</a>
@@ -30,7 +30,7 @@
 
   <!-- No result state -->
   <div id="no-result" class="empty-state" style="display:none;">
-    <div class="empty-icon">📊</div>
+    <div class="empty-icon"></div>
     <div class="empty-title">No analysis yet</div>
     <div class="empty-desc">Complete the wizard on the dashboard to see your results here.</div>
     <a href="dashboard.html" class="btn btn-primary" style="margin-top:8px;">Go to Dashboard →</a>
@@ -47,16 +47,16 @@
           <p class="page-subtitle animate-slide-up delay-1" id="result-date">Analysed just now</p>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;" class="animate-fade-in delay-2">
-          <a href="dashboard.html" class="btn btn-secondary btn-sm">🔄 Re-analyse</a>
-          <a href="history.html"   class="btn btn-secondary btn-sm">📜 History</a>
-          <button class="btn btn-secondary btn-sm" onclick="window.print()">⬇️ Export PDF</button>
+          <a href="dashboard.html" class="btn btn-secondary btn-sm">Re-analyse</a>
+          <a href="history.html"   class="btn btn-secondary btn-sm">History</a>
+          <button class="btn btn-secondary btn-sm" onclick="window.print()">Export PDF</button>
         </div>
       </div>
     </div>
 
     <!-- Contextual message -->
     <div class="message-box green animate-slide-up delay-2" id="message-box">
-      <div class="message-box-icon" id="msg-icon">🎓</div>
+      <div class="message-box-icon" id="msg-icon"><img src="img/logo.png" alt=""></div>
       <div>
         <div class="message-box-title" id="msg-title">Loading…</div>
         <div class="message-box-text"  id="msg-text"></div>
@@ -70,7 +70,7 @@
       <div class="card" style="padding:0;overflow:hidden;">
         <div style="background:var(--bg2);border-bottom:1px solid var(--border);
           padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-weight:700;font-size:.9375rem;">📊 CGPA Prediction</span>
+          <span style="font-weight:700;font-size:.9375rem;">CGPA Prediction</span>
           <span class="badge badge-blue" id="scale-badge">5.0 Scale</span>
         </div>
         <div class="gauge-outer">
@@ -94,7 +94,7 @@
 
         <!-- Gap analysis bars -->
         <div class="card" style="padding:22px;">
-          <div style="font-weight:700;font-size:.9375rem;margin-bottom:18px;display:flex;align-items:center;gap:8px;">📏 Gap Analysis</div>
+          <div style="font-weight:700;font-size:.9375rem;margin-bottom:18px;display:flex;align-items:center;gap:8px;">Gap Analysis</div>
           <div style="display:flex;flex-direction:column;gap:14px;">
             <div class="progress-wrap">
               <div class="progress-header">
@@ -127,14 +127,14 @@
 
         <!-- Input summary row -->
         <div class="card" style="padding:18px;">
-          <div style="font-weight:700;font-size:.875rem;margin-bottom:12px;display:flex;align-items:center;gap:6px;">📋 Your Inputs Summary</div>
+          <div style="font-weight:700;font-size:.875rem;margin-bottom:12px;display:flex;align-items:center;gap:6px;">Your Inputs Summary</div>
           <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;" id="input-summary"></div>
         </div>
 
         <!-- Recommendations -->
         <div class="card">
           <div style="font-family:var(--font-display);font-size:1.125rem;font-weight:700;
-            margin-bottom:18px;display:flex;align-items:center;gap:8px;">🎯 Your Action Plan</div>
+            margin-bottom:18px;display:flex;align-items:center;gap:8px;">Your Action Plan</div>
           <div style="display:flex;flex-direction:column;gap:10px;" id="recs-list"></div>
         </div>
       </div>
@@ -144,7 +144,7 @@
     <div class="card animate-slide-up delay-4" id="timetable-section" style="display:none;margin-top:24px;padding:0;overflow:hidden;">
       <div style="background:var(--bg2);border-bottom:1px solid var(--border);padding:18px 22px;">
         <div style="font-family:var(--font-display);font-size:1.25rem;font-weight:700;margin-bottom:4px;">
-          🗓️ Smart Weekly Study Timetable
+          Smart Weekly Study Timetable
         </div>
         <div style="font-size:.8rem;color:var(--text-muted);">
           Auto-generated from your courses, commute, and schedule constraints. Study blocks avoid your class days.
@@ -158,7 +158,7 @@
         <div class="tt-legend" id="tt-legend"></div>
         <!-- Info note -->
         <div class="alert alert-success" style="margin-top:14px;font-size:.8125rem;">
-          <span class="alert-icon">💡</span>
+          <span class="alert-icon"></span>
           <span>Study blocks are placed on days <strong>different from</strong> your class days. Morning commute and work slots are reserved. Adjust your course class days in the wizard to regenerate.</span>
         </div>
       </div>
@@ -167,7 +167,7 @@
     <!-- No timetable info (when no courses added) -->
     <div class="card animate-slide-up delay-4" id="no-timetable" style="display:none;margin-top:24px;">
       <div class="empty-state" style="padding:40px;">
-        <div class="empty-icon">🗓️</div>
+        <div class="empty-icon"></div>
         <div class="empty-title">No timetable generated</div>
         <div class="empty-desc">Add your courses in Step 3 of the wizard to get a personalised Smart Timetable.</div>
         <a href="dashboard.html" class="btn btn-primary" style="margin-top:12px;">Add Courses →</a>

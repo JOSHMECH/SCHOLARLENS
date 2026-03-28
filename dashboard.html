@@ -13,7 +13,7 @@
   <div class="container" style="max-width:100%;padding:0 24px;">
     <div class="navbar-inner">
       <a href="index.html" class="logo">
-        <div class="logo-icon">🎓</div>
+        <div class="logo-icon"><img src="img/white logo.png" alt=""></div>
         Scholar<span>Lens</span>
       </a>
       <div class="nav-links">
@@ -74,14 +74,14 @@
 
     <!-- Grading Scale -->
     <div class="field-section">
-      <div class="field-section-title">🏫 Select your grading system</div>
+      <div class="field-section-title">Select your grading system</div>
       <div class="scale-toggle">
         <div class="scale-option">
           <input type="radio" name="grading-scale" id="scale-5" value="5" checked />
           <label class="scale-label" for="scale-5">
             <span class="scale-label-title">5.0 Scale</span>
             <span class="scale-label-sub">Used by most Nigerian Universities (NUGA standard). First Class = 4.50–5.00.</span>
-            <span class="scale-label-badge">🏛 University</span>
+            <span class="scale-label-badge">University</span>
           </label>
         </div>
         <div class="scale-option">
@@ -89,7 +89,7 @@
           <label class="scale-label" for="scale-4">
             <span class="scale-label-title">4.0 Scale</span>
             <span class="scale-label-sub">Used by Polytechnics &amp; some private universities. Distinction = 3.50–4.00.</span>
-            <span class="scale-label-badge">🔧 Polytechnic / Private</span>
+            <span class="scale-label-badge">Polytechnic / Private</span>
           </label>
         </div>
       </div>
@@ -97,7 +97,7 @@
 
     <!-- Academic Demographics -->
     <div class="field-section">
-      <div class="field-section-title">📋 Academic demographics</div>
+      <div class="field-section-title">Academic demographics</div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label" for="current-level">Current Level</label>
@@ -123,7 +123,7 @@
 
     <!-- CGPA Inputs -->
     <div class="field-section">
-      <div class="field-section-title">📊 Academic performance</div>
+      <div class="field-section-title">Academic performance</div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label" for="current-cgpa">Current CGPA <span style="color:var(--red-500)">*</span></label>
@@ -169,13 +169,13 @@
     </div>
 
     <div class="field-section">
-      <div class="field-section-title">⏰ Daily time commitments</div>
+      <div class="field-section-title">Daily time commitments</div>
       <div style="display:flex;flex-direction:column;gap:14px;">
 
         <div class="slider-group">
           <div class="slider-header">
             <div>
-              <div class="slider-label-text">🚗 Daily Commute</div>
+              <div class="slider-label-text">Daily Commute</div>
               <div class="slider-label-hint">Total hours travelling to/from campus per day</div>
             </div>
             <div class="slider-value" id="val-commute">2 <span class="slider-unit">hrs</span></div>
@@ -187,7 +187,7 @@
         <div class="slider-group">
           <div class="slider-header">
             <div>
-              <div class="slider-label-text">💼 Work / Extracurriculars</div>
+              <div class="slider-label-text">Work / Extracurriculars</div>
               <div class="slider-label-hint">Part-time jobs, sports, fellowship, societies, etc.</div>
             </div>
             <div class="slider-value" id="val-work">2 <span class="slider-unit">hrs</span></div>
@@ -199,7 +199,7 @@
         <div class="slider-group">
           <div class="slider-header">
             <div>
-              <div class="slider-label-text">😴 Target Sleep</div>
+              <div class="slider-label-text">Target Sleep</div>
               <div class="slider-label-hint">Science says 7–9 hrs optimises memory consolidation</div>
             </div>
             <div class="slider-value" id="val-sleep">8 <span class="slider-unit">hrs</span></div>
@@ -211,7 +211,7 @@
         <div class="slider-group">
           <div class="slider-header">
             <div>
-              <div class="slider-label-text">🏫 Class Attendance Rate</div>
+              <div class="slider-label-text">Class Attendance Rate</div>
               <div class="slider-label-hint">Your current overall lecture attendance percentage</div>
             </div>
             <div class="slider-value" id="val-attendance">80 <span class="slider-unit">%</span></div>
@@ -224,7 +224,7 @@
 
     <!-- Available time summary -->
     <div class="field-section">
-      <div class="field-section-title">📐 Available time breakdown</div>
+      <div class="field-section-title">Available time breakdown</div>
       <div class="time-summary">
         <div>
           <div class="time-summary-val" id="avail-hours-day">14.0</div>
@@ -262,7 +262,7 @@
     </div>
 
     <div class="field-section" style="margin-bottom:0">
-      <div class="field-section-title">📚 Courses this semester</div>
+      <div class="field-section-title">Courses this semester</div>
 
       <div class="courses-empty" id="courses-empty">
         <div class="courses-empty-icon">📚</div>
@@ -300,20 +300,20 @@
     <div class="review-grid" id="review-content"></div>
 
     <div id="review-courses-section" style="margin-bottom:20px;display:none;">
-      <div class="field-section-title">📚 Courses registered</div>
+      <div class="field-section-title">Courses registered</div>
       <div id="review-courses-chips" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;">
       <div class="derived-stat">
-        <span style="font-size:1.25rem;">⏰</span>
+        
         <div>
           <div class="derived-stat-val" id="derived-free">—</div>
           <div style="font-size:.75rem;color:var(--text-muted);">Free time / day</div>
         </div>
       </div>
       <div class="derived-stat">
-        <span style="font-size:1.25rem;">📖</span>
+        
         <div>
           <div class="derived-stat-val" id="derived-study">—</div>
           <div style="font-size:.75rem;color:var(--text-muted);">Est. study hrs / week</div>
@@ -324,10 +324,10 @@
     <div id="analyze-alert" style="display:none;margin-bottom:16px;"></div>
 
     <button class="btn btn-primary btn-full btn-lg" id="analyze-btn" onclick="runAnalysis()">
-      🔍 Generate Prediction &amp; Smart Timetable
+      Generate Prediction &amp; Smart Timetable
     </button>
     <p style="text-align:center;margin-top:10px;font-size:.8rem;color:var(--text-muted);">
-      🔒 Results saved securely · Analysis takes ~3 seconds
+      Results saved securely · Analysis takes ~3 seconds
     </p>
 
     <div class="wizard-nav" style="border-top:none;padding-top:0;margin-top:6px;">
