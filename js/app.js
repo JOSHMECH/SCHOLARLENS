@@ -3,21 +3,33 @@
    app.js: Auth state, Toast system, Theme toggle, Storage helpers
    ============================================================ */
 
-// ── SUPABASE CONFIG ──────────────────────────────────────────
-// Replace these with your actual Supabase credentials from .env
-const SUPABASE_URL = window.SUPABASE_URL || '';
-const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+// ── FIREBASE CONFIG ──────────────────────────────────────────
+// Injected by each HTML page via window.FIREBASE_CONFIG
+// Falls back to localStorage demo mode if not set.
+const FIREBASE_CONFIG = window.FIREBASE_CONFIG || null;
 
-// Initialize Supabase client (loaded via CDN in HTML)
-let supabase = null;
-function initSupabase() {
-  if (window.supabase && SUPABASE_URL !== '') {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Firebase module references (populated after SDK load)
+let _auth = null;
+let _db   = null;
+
+function initFirebase() {
+  if (!FIREBASE_CONFIG || typeof firebase === 'undefined') return false;
+  try {
+    if (!firebase.apps.length) {
+      firebase.initializeApp(FIREBASE_CONFIG);
+    }
+    _auth = firebase.auth();
+    _db   = firebase.firestore();
+    return true;
+  } catch (e) {
+    console.warn('Firebase init error:', e);
+    return false;
   }
-  return supabase;
 }
 
-// ── LOCAL STORAGE HELPERS (fallback when Supabase not configured) ──
+const firebaseReady = () => !!_auth;
+
+// ── LOCAL STORAGE HELPERS (fallback when Firebase not configured) ──
 const Store = {
   get(key, def = null) {
     try { const v = localStorage.getItem('sl_' + key); return v ? JSON.parse(v) : def; }
@@ -34,10 +46,16 @@ const Auth = {
   currentUser: null,
 
   async init() {
-    initSupabase();
-    if (supabase) {
-      const { data: { session } } = await supabase.auth.getSession();
-      this.currentUser = session?.user || null;
+    initFirebase();
+    if (firebaseReady()) {
+      // Wait for Firebase auth state to resolve
+      await new Promise((resolve) => {
+        const unsub = _auth.onAuthStateChanged((user) => {
+          this.currentUser = user || null;
+          unsub();
+          resolve();
+        });
+      });
     } else {
       // Fallback: use localStorage demo auth
       this.currentUser = Store.get('user');
@@ -46,14 +64,12 @@ const Auth = {
   },
 
   async signUp(email, password, name) {
-    if (supabase) {
-      const { data, error } = await supabase.auth.signUp({
-        email, password,
-        options: { data: { full_name: name } }
-      });
-      if (error) throw error;
-      this.currentUser = data.user;
-      return data.user;
+    if (firebaseReady()) {
+      const cred = await _auth.createUserWithEmailAndPassword(email, password);
+      // Set display name
+      await cred.user.updateProfile({ displayName: name });
+      this.currentUser = cred.user;
+      return cred.user;
     } else {
       // Demo mode
       const users = Store.get('users', {});
@@ -68,11 +84,10 @@ const Auth = {
   },
 
   async signIn(email, password) {
-    if (supabase) {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      this.currentUser = data.user;
-      return data.user;
+    if (firebaseReady()) {
+      const cred = await _auth.signInWithEmailAndPassword(email, password);
+      this.currentUser = cred.user;
+      return cred.user;
     } else {
       const users = Store.get('users', {});
       const found = users[email];
@@ -85,8 +100,8 @@ const Auth = {
   },
 
   async signOut() {
-    if (supabase) {
-      await supabase.auth.signOut();
+    if (firebaseReady()) {
+      await _auth.signOut();
     } else {
       Store.remove('user');
     }
@@ -98,7 +113,8 @@ const Auth = {
   getUserName() {
     const u = this.currentUser;
     if (!u) return 'Student';
-    return u.user_metadata?.full_name || u.name || u.email?.split('@')[0] || 'Student';
+    // Firebase: displayName | demo-mode: name
+    return u.displayName || u.name || u.email?.split('@')[0] || 'Student';
   },
 };
 
@@ -164,39 +180,87 @@ const PredictionStore = {
       ...result,
       created_at: new Date().toISOString(),
     };
-    if (supabase) {
-      // Save input
-      await supabase.from('student_inputs').insert([{
-        user_id: userId, current_cgpa: input.current_cgpa, target_cgpa: input.target_cgpa,
-        study_hours: input.study_hours, attendance: input.attendance, carry_overs: input.carry_overs,
-      }]);
-      // Save prediction
-      await supabase.from('predictions').insert([{
-        user_id: userId, predicted_cgpa: result.predicted_cgpa,
-        recommendations: JSON.stringify(result.recommendations),
-        risk_level: result.risk_level,
-      }]);
+
+    if (firebaseReady() && userId && userId !== 'demo') {
+      try {
+        // Write a single flat document to users/{uid}/predictions
+        await _db.collection('users').doc(userId).collection('predictions').add({
+          current_cgpa:    input.current_cgpa,
+          target_cgpa:     input.target_cgpa,
+          study_hours:     input.study_hours,
+          attendance:      input.attendance,
+          carry_overs:     input.carry_overs,
+          predicted_cgpa:  result.predicted_cgpa,
+          recommendations: result.recommendations,
+          risk_level:      result.risk_level,
+          created_at:      firebase.firestore.FieldValue.serverTimestamp(),
+        });
+      } catch (e) {
+        console.warn('Firestore write error:', e);
+        // Fall through to localStorage cache
+      }
     } else {
       const history = Store.get(`history_${userId}`, []);
       history.unshift(record);
       Store.set(`history_${userId}`, history.slice(0, 50)); // keep last 50
     }
-    // Always cache latest for results page
+
+    // Always cache latest result for the results page
     Store.set('last_result', { input, result, timestamp: new Date().toISOString() });
     return record;
   },
 
   async getHistory(userId) {
-    if (supabase) {
-      const { data } = await supabase
-        .from('predictions')
-        .select('*, student_inputs(*)')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(20);
-      return data || [];
+    if (firebaseReady() && userId && userId !== 'demo') {
+      try {
+        const snap = await _db
+          .collection('users').doc(userId).collection('predictions')
+          .orderBy('created_at', 'desc')
+          .limit(50)
+          .get();
+
+        return snap.docs.map(doc => {
+          const d = doc.data();
+          return {
+            id:            doc.id,
+            user_id:       userId,
+            current_cgpa:  d.current_cgpa,
+            target_cgpa:   d.target_cgpa,
+            study_hours:   d.study_hours,
+            attendance:    d.attendance,
+            carry_overs:   d.carry_overs,
+            predicted_cgpa: d.predicted_cgpa,
+            recommendations: d.recommendations,
+            risk_level:    d.risk_level,
+            // Firestore Timestamp → ISO string
+            created_at: d.created_at?.toDate
+              ? d.created_at.toDate().toISOString()
+              : d.created_at || new Date().toISOString(),
+          };
+        });
+      } catch (e) {
+        console.warn('Firestore read error:', e);
+      }
     }
     return Store.get(`history_${userId}`, []);
+  },
+
+  async deleteRecord(userId, recordId) {
+    if (firebaseReady() && userId && userId !== 'demo') {
+      try {
+        await _db
+          .collection('users').doc(userId)
+          .collection('predictions').doc(recordId)
+          .delete();
+        return true;
+      } catch (e) {
+        console.warn('Firestore delete error:', e);
+      }
+    }
+    // localStorage fallback
+    const history = Store.get(`history_${userId}`, []);
+    Store.set(`history_${userId}`, history.filter(r => r.id !== recordId));
+    return true;
   },
 };
 

@@ -22,19 +22,23 @@ app = Flask(__name__)
 CORS(app, origins=["http://localhost:3000", "http://127.0.0.1:5500",
                     "http://localhost:5500", "*"])
 
-# ── SUPABASE SETUP (optional) ─────────────────────────────────
-supabase = None
+# ── FIREBASE ADMIN SETUP (optional) ──────────────────────────
+db = None
 try:
-    from supabase import create_client
-    SUPABASE_URL = os.getenv("SUPABASE_URL")
-    SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
-    if SUPABASE_URL and SUPABASE_KEY:
-        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-        print("✅ Supabase connected.")
+    import firebase_admin
+    from firebase_admin import credentials, firestore
+
+    service_account = os.getenv("FIREBASE_SERVICE_ACCOUNT")  # path to JSON file
+    if service_account and os.path.isfile(service_account):
+        if not firebase_admin._apps:
+            cred = credentials.Certificate(service_account)
+            firebase_admin.initialize_app(cred)
+        db = firestore.client()
+        print("✅ Firebase Admin connected.")
     else:
-        print("⚠️  Supabase env vars not set — running in local mode.")
+        print("⚠️  FIREBASE_SERVICE_ACCOUNT not set or file not found — running in local mode.")
 except ImportError:
-    print("⚠️  supabase-py not installed — running without DB persistence.")
+    print("⚠️  firebase-admin not installed — running without DB persistence.")
 
 # ── LOAD PREDICTOR ────────────────────────────────────────────
 predictor = ScholarPredictor()
@@ -78,7 +82,7 @@ def analyze():
         study_hours   float   0–100
         attendance    float   0–100
         carry_overs   int     0–30
-        user_id       str     (optional)
+        user_id       str     (optional — Firebase UID)
     """
     data = request.get_json(force=True)
 
@@ -113,25 +117,23 @@ def analyze():
         "timestamp":        datetime.utcnow().isoformat() + "Z",
     }
 
-    # ── Persist (if Supabase configured + user_id given) ──────
-    if supabase and user_id:
+    # ── Persist to Firestore (if configured + user_id given) ──
+    if db and user_id:
         try:
-            supabase.table("student_inputs").insert({
-                "user_id":      user_id,
-                "current_cgpa": current_cgpa,
-                "target_cgpa":  target_cgpa,
-                "study_hours":  study_hours,
-                "attendance":   attendance,
-                "carry_overs":  carry_overs,
-            }).execute()
-            supabase.table("predictions").insert({
-                "user_id":        user_id,
-                "predicted_cgpa": predicted_cgpa,
-                "recommendations": json.dumps(recommendations),
-                "risk_level":     risk_level,
-            }).execute()
+            # Write a single flat document to users/{uid}/predictions
+            db.collection("users").document(user_id).collection("predictions").add({
+                "current_cgpa":    current_cgpa,
+                "target_cgpa":     target_cgpa,
+                "study_hours":     study_hours,
+                "attendance":      attendance,
+                "carry_overs":     carry_overs,
+                "predicted_cgpa":  predicted_cgpa,
+                "recommendations": recommendations,
+                "risk_level":      risk_level,
+                "created_at":      firestore.SERVER_TIMESTAMP,
+            })
         except Exception as e:
-            print(f"DB write error: {e}")
+            print(f"Firestore write error: {e}")
 
     return jsonify(result), 200
 
@@ -139,17 +141,35 @@ def analyze():
 # ── GET /history/<user_id> ────────────────────────────────────
 @app.route("/history/<user_id>", methods=["GET"])
 def get_history(user_id):
-    if not supabase:
+    if not db:
         return jsonify({"error": "Database not configured"}), 503
 
     try:
-        resp = (supabase.table("predictions")
-                .select("*, student_inputs(*)")
-                .eq("user_id", user_id)
-                .order("created_at", desc=True)
-                .limit(50)
-                .execute())
-        return jsonify({"history": resp.data or []}), 200
+        snap = (
+            db.collection("users")
+            .document(user_id)
+            .collection("predictions")
+            .order_by("created_at", direction=firestore.Query.DESCENDING)
+            .limit(50)
+            .stream()
+        )
+        records = []
+        for doc in snap:
+            d = doc.to_dict()
+            records.append({
+                "id":            doc.id,
+                "user_id":       user_id,
+                "current_cgpa":  d.get("current_cgpa"),
+                "target_cgpa":   d.get("target_cgpa"),
+                "study_hours":   d.get("study_hours"),
+                "attendance":    d.get("attendance"),
+                "carry_overs":   d.get("carry_overs"),
+                "predicted_cgpa": d.get("predicted_cgpa"),
+                "recommendations": d.get("recommendations"),
+                "risk_level":    d.get("risk_level"),
+                "created_at":    d["created_at"].isoformat() if hasattr(d.get("created_at"), "isoformat") else str(d.get("created_at", "")),
+            })
+        return jsonify({"history": records}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

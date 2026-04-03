@@ -363,6 +363,21 @@
 <style>@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-10px)}}</style>
 
 
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+  window.FIREBASE_CONFIG = {
+    apiKey:            "AIzaSyC2wKPUnfnirnz1cvTKDS_vCOHlgMEswto",
+    authDomain:        "scholarlens-dd01c.firebaseapp.com",
+    projectId:         "scholarlens-dd01c",
+    storageBucket:     "scholarlens-dd01c.firebasestorage.app",
+    messagingSenderId: "388831913229",
+    appId:             "1:388831913229:web:0759a0587dd5e7828ebc44",
+    measurementId:     "G-TSR6QXV960"
+  };
+</script>
 <script src="js/app.js"></script>
 <script>
 /* ══════════════════════════════════════════════════
@@ -760,7 +775,7 @@ async function runAnalysis() {
     try {
       const res = await fetch('http://localhost:5000/analyze',{
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({...input, user_id:currentUser?.id}),
+        body: JSON.stringify({...input, user_id:currentUser?.uid||currentUser?.id}),
         signal: AbortSignal.timeout(2500),
       });
       if (res.ok) result = await res.json();
@@ -779,7 +794,7 @@ async function runAnalysis() {
     await new Promise(r=>setTimeout(r,2200));
     clearInterval(iv);
     Store.set('wizard_state', {profile:p, logistics:l, courses});
-    await PredictionStore.save(currentUser?.id||'demo', input, result);
+    await PredictionStore.save(currentUser?.uid||currentUser?.id||'demo', input, result);
     window.location.href = 'results.html';
   } catch(err) {
     clearInterval(iv);

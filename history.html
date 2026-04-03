@@ -104,7 +104,7 @@
       <div class="stat-value" id="stat-latest">—</div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon" id="stat-trend-icon" style=""></div>
+      <div class="stat-icon" id="stat-trend-icon"></div>
       <div class="stat-label">Trend</div>
       <div class="stat-value" id="stat-trend" style="font-size:1.25rem;">—</div>
     </div>
@@ -167,6 +167,21 @@
 
 
 
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+  window.FIREBASE_CONFIG = {
+    apiKey:            "AIzaSyC2wKPUnfnirnz1cvTKDS_vCOHlgMEswto",
+    authDomain:        "scholarlens-dd01c.firebaseapp.com",
+    projectId:         "scholarlens-dd01c",
+    storageBucket:     "scholarlens-dd01c.firebasestorage.app",
+    messagingSenderId: "388831913229",
+    appId:             "1:388831913229:web:0759a0587dd5e7828ebc44",
+    measurementId:     "G-TSR6QXV960"
+  };
+</script>
 <script src="js/app.js"></script>
 <script>
 let allHistory = [];
@@ -180,7 +195,7 @@ let trendChartInst = null;
 })();
 
 async function loadHistory() {
-  allHistory = await PredictionStore.getHistory(currentUser?.id || 'demo');
+  allHistory = await PredictionStore.getHistory(currentUser?.uid || currentUser?.id || 'demo');
   render();
 }
 
@@ -340,20 +355,20 @@ function renderTrendChart() {
   });
 }
 
-function deleteRecord(id) {
+async function deleteRecord(id) {
   if (!confirm('Delete this analysis record?')) return;
-  const userId = currentUser?.id || 'demo';
-  const history = Store.get(`history_${userId}`, []);
-  const updated = history.filter(r => r.id !== id);
-  Store.set(`history_${userId}`, updated);
-  allHistory = updated;
+  const userId = currentUser?.uid || currentUser?.id || 'demo';
+  await PredictionStore.deleteRecord(userId, id);
+  allHistory = allHistory.filter(r => r.id !== id);
   render();
   Toast.success('Record deleted.');
 }
 
-document.getElementById('clear-all').addEventListener('click', () => {
+document.getElementById('clear-all').addEventListener('click', async () => {
   if (!confirm('Delete ALL analysis history? This cannot be undone.')) return;
-  const userId = currentUser?.id || 'demo';
+  const userId = currentUser?.uid || currentUser?.id || 'demo';
+  // Delete each Firestore record (or purge localStorage)
+  await Promise.all(allHistory.map(r => PredictionStore.deleteRecord(userId, r.id)));
   Store.remove(`history_${userId}`);
   Store.remove('last_result');
   allHistory = [];
