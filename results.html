@@ -19,12 +19,24 @@
         <a href="history.html"   class="nav-link">History</a>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
-        <button class="theme-toggle">🌙</button>
+        <button class="theme-toggle"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
         <button data-action="logout" class="btn btn-secondary btn-sm">Log out</button>
+        <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
       </div>
     </div>
   </div>
 </nav>
+
+<!-- Mobile navigation drawer -->
+<div class="mobile-nav-drawer" id="mobile-nav-drawer">
+  <a href="dashboard.html" class="nav-link">Dashboard</a>
+  <a href="results.html"   class="nav-link active">Results</a>
+  <a href="history.html"   class="nav-link">History</a>
+  <div class="mobile-nav-divider"></div>
+  <button data-action="logout" class="btn btn-secondary btn-sm">Log out</button>
+</div>
 
 <div class="container page-wrap">
 
@@ -298,14 +310,14 @@ const END_HR    = 22;  // 10pm
 const SLOTS     = END_HR - START_HR; // 15 slots
 
 const COURSE_PALETTE = [
-  { bg:'#dbeafe', border:'#3b82f6', text:'#1e40af', emoji:'📘' },
-  { bg:'#dcfce7', border:'#16a34a', text:'#14532d', emoji:'📗' },
-  { bg:'#fef3c7', border:'#d97706', text:'#78350f', emoji:'📙' },
-  { bg:'#fce7f3', border:'#db2777', text:'#831843', emoji:'📕' },
-  { bg:'#ede9fe', border:'#7c3aed', text:'#4c1d95', emoji:'📓' },
-  { bg:'#ffedd5', border:'#ea580c', text:'#7c2d12', emoji:'📔' },
-  { bg:'#e0f2fe', border:'#0284c7', text:'#0c4a6e', emoji:'📒' },
-  { bg:'#f0fdf4', border:'#15803d', text:'#052e16', emoji:'📖' },
+  { bg:'#dbeafe', border:'#3b82f6', text:'#1e40af' },
+  { bg:'#dcfce7', border:'#16a34a', text:'#14532d' },
+  { bg:'#fef3c7', border:'#d97706', text:'#78350f' },
+  { bg:'#fce7f3', border:'#db2777', text:'#831843' },
+  { bg:'#ede9fe', border:'#7c3aed', text:'#4c1d95' },
+  { bg:'#ffedd5', border:'#ea580c', text:'#7c2d12' },
+  { bg:'#e0f2fe', border:'#0284c7', text:'#0c4a6e' },
+  { bg:'#f0fdf4', border:'#15803d', text:'#052e16' },
 ];
 
 function buildTimetable(courses, logistics) {
@@ -330,26 +342,26 @@ function buildTimetable(courses, logistics) {
 
     // Sleep buffer (very early morning)
     for (let s=0; s<wakeOffset && s<SLOTS; s++) {
-      grid[day][s] = {type:'sleep', label:'😴 Rest'};
+      grid[day][s] = {type:'sleep', label:'Rest'};
     }
 
     if (!isWeekend) {
       // Morning commute
       for (let s=wakeOffset; s<wakeOffset+mComm && s<SLOTS; s++) {
-        grid[day][s] = {type:'commute', label:'🚗 Commute'};
+        grid[day][s] = {type:'commute', label:'Commute'};
       }
       // Work/extracurricular (late afternoon: slot 9 = 4pm)
       if (work > 0) {
         const ws = 9;
         for (let s=ws; s<ws+Math.min(work,5) && s<SLOTS-eComm; s++) {
-          if (grid[day][s].type==='free') grid[day][s] = {type:'work', label:'💼 Work/Extra'};
+          if (grid[day][s].type==='free') grid[day][s] = {type:'work', label:'Work/Extra'};
         }
       }
       // Evening commute
       if (eComm > 0) {
         const es = SLOTS - eComm;
         for (let s=Math.max(0,es); s<SLOTS; s++) {
-          if (grid[day][s].type==='free') grid[day][s] = {type:'commute', label:'🚗 Commute'};
+          if (grid[day][s].type==='free') grid[day][s] = {type:'commute', label:'Commute'};
         }
       }
     }
@@ -422,15 +434,15 @@ function renderTimetable(grid, courses) {
         }
         if (cell.type==='commute') {
           return `<div class="tt-cell commute-block" title="Commute">
-            <span class="tt-cell-label" style="font-size:.58rem;">🚗</span></div>`;
+            <span class="tt-cell-label" style="font-size:.58rem;"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg></span></div>`;
         }
         if (cell.type==='work') {
           return `<div class="tt-cell work-block" title="Work / Extracurricular">
-            <span class="tt-cell-label" style="font-size:.58rem;">💼</span></div>`;
+            <span class="tt-cell-label" style="font-size:.58rem;"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span></div>`;
         }
         if (cell.type==='sleep') {
           return `<div class="tt-cell sleep-block" title="Rest time">
-            <span class="tt-cell-label" style="font-size:.58rem;color:#94a3b8;">😴</span></div>`;
+            <span class="tt-cell-label" style="font-size:.58rem;color:#94a3b8;"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg></span></div>`;
         }
         return `<div class="tt-cell free-block"></div>`;
       }).join('')}`;
@@ -510,22 +522,22 @@ function renderTimetable(grid, courses) {
 
   if (risk_level==='Low' && predicted_cgpa >= input.target_cgpa) {
     box.className = 'message-box green animate-slide-up delay-2';
-    msgIcon.textContent  = '🎉';
+    msgIcon.innerHTML    = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--green-600)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
     msgTitle.textContent = `${zone.label} — Target achieved!`;
     msgText.textContent  = `Your predicted CGPA of ${fmt.cgpa(predicted_cgpa)} meets your target of ${fmt.cgpa(input.target_cgpa)}. You're in the ${zone.label} class on the ${maxScale}.0 scale. Keep this up!`;
   } else if (risk_level==='Medium') {
     box.className = 'message-box amber animate-slide-up delay-2';
-    msgIcon.textContent  = '⚠️';
+    msgIcon.innerHTML    = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--amber-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>';
     msgTitle.textContent = `${zone.label} — Moderate effort needed`;
     msgText.textContent  = `To reach your ${fmt.cgpa(input.target_cgpa)} target, you need to close a ${Math.abs(gap).toFixed(2)} point gap. Follow the action plan and Smart Timetable below.`;
   } else if (risk_level==='High') {
     box.className = 'message-box red animate-slide-up delay-2';
-    msgIcon.textContent  = '🚨';
+    msgIcon.innerHTML    = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--red-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>';
     msgTitle.textContent = `${zone.label} — Significant improvement needed`;
     msgText.textContent  = `There is a ${Math.abs(gap).toFixed(2)} point gap between your prediction (${fmt.cgpa(predicted_cgpa)}) and your target (${fmt.cgpa(input.target_cgpa)}). Commit to the full action plan — it's achievable with focus.`;
   } else {
     box.className = 'message-box green animate-slide-up delay-2';
-    msgIcon.textContent  = '✅';
+    msgIcon.innerHTML    = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--green-600)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
     msgTitle.textContent = `${zone.label} — Close to target`;
     msgText.textContent  = `A small gap of ${Math.abs(gap).toFixed(2)} points separates you from your target. Minor adjustments to study time or attendance will get you there.`;
   }
@@ -560,17 +572,17 @@ function renderTimetable(grid, courses) {
   const gapEl  = document.getElementById('ga-gap');
   const gapVal = input.target_cgpa - predicted_cgpa;
   gapEl.textContent = gapVal <= 0
-    ? `+${Math.abs(gapVal).toFixed(2)} above target ✅`
+    ? `+${Math.abs(gapVal).toFixed(2)} above target <svg style="vertical-align:middle;margin-left:4px" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
     : `${gapVal.toFixed(2)} below target`;
   gapEl.style.color = gapVal<=0 ? 'var(--green-600)' : gapVal<=0.3 ? 'var(--amber-500)' : 'var(--red-500)';
 
   // ── INPUT SUMMARY ────────────────────────────────────────
   const summaryItems = [
-    {icon:'📚',label:'Current',val:fmt.cgpa(input.current_cgpa)},
-    {icon:'🎯',label:'Target', val:fmt.cgpa(input.target_cgpa)},
-    {icon:'⏰',label:'Study',  val:(input.study_hours||0).toFixed(1)+'h/wk'},
-    {icon:'🏫',label:'Attend.', val:input.attendance+'%'},
-    {icon:'📋',label:'Carry-Overs', val:input.carry_overs},
+    {icon:'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>',label:'Current',val:fmt.cgpa(input.current_cgpa)},
+    {icon:'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',label:'Target', val:fmt.cgpa(input.target_cgpa)},
+    {icon:'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',label:'Study',  val:(input.study_hours||0).toFixed(1)+'h/wk'},
+    {icon:'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',label:'Attend.', val:input.attendance+'%'},
+    {icon:'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',label:'Carry-Overs', val:input.carry_overs},
   ];
   document.getElementById('input-summary').innerHTML = summaryItems.map(it=>`
     <div style="text-align:center;padding:10px 6px;background:var(--bg2);
@@ -584,7 +596,7 @@ function renderTimetable(grid, courses) {
   // ── RECOMMENDATIONS ──────────────────────────────────────
   document.getElementById('recs-list').innerHTML = (recommendations||[]).map((r,i)=>`
     <div class="rec-item animate-slide-up" style="animation-delay:${i*0.08}s;">
-      <div class="rec-icon">${r.icon||'💡'}</div>
+      <div class="rec-icon">${r.icon||'<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>'}</div>
       <div class="rec-text">
         <div class="rec-title">${r.title}</div>
         <div class="rec-desc">${r.desc}</div>

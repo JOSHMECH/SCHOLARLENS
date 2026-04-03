@@ -63,12 +63,24 @@
         <a href="history.html"   class="nav-link active">History</a>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
-        <button class="theme-toggle">🌙</button>
+        <button class="theme-toggle"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
         <button data-action="logout" class="btn btn-secondary btn-sm">Log out</button>
+        <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
       </div>
     </div>
   </div>
 </nav>
+
+<!-- Mobile navigation drawer -->
+<div class="mobile-nav-drawer" id="mobile-nav-drawer">
+  <a href="dashboard.html" class="nav-link">Dashboard</a>
+  <a href="results.html"   class="nav-link">Results</a>
+  <a href="history.html"   class="nav-link active">History</a>
+  <div class="mobile-nav-divider"></div>
+  <button data-action="logout" class="btn btn-secondary btn-sm">Log out</button>
+</div>
 
 <div class="container page-wrap">
 
@@ -80,8 +92,8 @@
       </div>
       <div style="display:flex;gap:10px;" class="animate-fade-in delay-2">
         <a href="dashboard.html" class="btn btn-primary btn-sm">+ New Analysis</a>
-        <button class="btn btn-secondary btn-sm" id="export-csv">⬇ Export CSV</button>
-        <button class="btn btn-danger btn-sm" id="clear-all" style="display:none;">🗑 Clear all</button>
+        <button class="btn btn-secondary btn-sm" id="export-csv"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export CSV</button>
+        <button class="btn btn-danger btn-sm" id="clear-all" style="display:none;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>Clear all</button>
       </div>
     </div>
   </div>
@@ -236,7 +248,7 @@ function render() {
     const up = parseFloat(trend) >= 0;
     trendEl.textContent = (up ? '+' : '') + trend + ' pts';
     trendEl.style.color = up ? 'var(--green-600)' : 'var(--red-500)';
-    trendIcon.textContent = up ? '📈' : '📉';
+    trendIcon.innerHTML = up ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--green-600)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>' : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--red-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>';
     trendIcon.className = 'stat-icon ' + (up ? 'green' : 'red');
   } else {
     trendEl.textContent = 'Only 1 analysis';
@@ -247,7 +259,7 @@ function render() {
   tbody.innerHTML = allHistory.map((r, i) => {
     const rColor = fmt.riskColor(r.risk_level);
     const badgeClass = `badge badge-${rColor}`;
-    const riskDot = { Low:'🟢', Medium:'🟡', High:'🔴' }[r.risk_level] || '⚪';
+    const riskDot = { Low:'<svg width="12" height="12" viewBox="0 0 24 24" fill="var(--green-500)" stroke="none"><circle cx="12" cy="12" r="10"/></svg>', Medium:'<svg width="12" height="12" viewBox="0 0 24 24" fill="var(--amber-500)" stroke="none"><circle cx="12" cy="12" r="10"/></svg>', High:'<svg width="12" height="12" viewBox="0 0 24 24" fill="var(--red-500)" stroke="none"><circle cx="12" cy="12" r="10"/></svg>' }[r.risk_level] || '<svg width="12" height="12" viewBox="0 0 24 24" fill="var(--border)" stroke="none"><circle cx="12" cy="12" r="10"/></svg>';
     const gapVal = parseFloat((r.target_cgpa - r.predicted_cgpa) || 0);
     return `
       <tr>
@@ -269,7 +281,7 @@ function render() {
         <td>${fmt.cgpa(r.target_cgpa)}</td>
         <td><span class="${badgeClass}">${riskDot} ${r.risk_level}</span></td>
         <td>
-          <button class="delete-btn" onclick="deleteRecord('${r.id}')" title="Delete this record">🗑</button>
+          <button class="delete-btn" onclick="deleteRecord('${r.id}')" title="Delete this record"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
         </td>
       </tr>
     `;

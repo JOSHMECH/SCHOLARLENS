@@ -22,12 +22,24 @@
         <a href="history.html"   class="nav-link">History</a>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
-        <button class="theme-toggle">🌙</button>
+        <button class="theme-toggle"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
         <button data-action="logout" class="btn btn-secondary btn-sm">Log out</button>
+        <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
       </div>
     </div>
   </div>
 </nav>
+
+<!-- Mobile navigation drawer -->
+<div class="mobile-nav-drawer" id="mobile-nav-drawer">
+  <a href="dashboard.html" class="nav-link active">Dashboard</a>
+  <a href="results.html"   class="nav-link">Results</a>
+  <a href="history.html"   class="nav-link">History</a>
+  <div class="mobile-nav-divider"></div>
+  <button data-action="logout" class="btn btn-secondary btn-sm">Log out</button>
+</div>
 
 <div class="wizard-page">
 <div class="container-sm">
@@ -265,7 +277,7 @@
       <div class="field-section-title">Courses this semester</div>
 
       <div class="courses-empty" id="courses-empty">
-        <div class="courses-empty-icon">📚</div>
+        <div class="courses-empty-icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg></div>
         <div class="courses-empty-text">No courses yet — click "Add Course" to start.</div>
       </div>
 
@@ -348,7 +360,7 @@
   <div style="background:var(--card-bg);border-radius:var(--radius-xl);
     padding:44px 52px;text-align:center;box-shadow:var(--shadow-xl);
     max-width:380px;width:calc(100% - 48px);">
-    <div style="font-size:2.75rem;margin-bottom:16px;" id="loading-icon">🧮</div>
+    <div style="margin-bottom:16px;" id="loading-icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--green-600)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg></div>
     <div style="font-family:var(--font-display);font-size:1.25rem;font-weight:700;
       margin-bottom:8px;" id="loading-title">Running analysis…</div>
     <div style="color:var(--text-muted);font-size:.875rem;margin-bottom:24px;"
@@ -454,11 +466,11 @@ function updateAvailableTime() {
   if (free < 3) {
     warn.style.display = '';
     warn.className = 'alert alert-warning';
-    warn.innerHTML = '<span class="alert-icon">⚠️</span><span>Very little free time detected. Study may be severely constrained.</span>';
+    warn.innerHTML = '<span class="alert-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg></span><span>Very little free time detected. Study may be severely constrained.</span>';
   } else if (free >= 10) {
     warn.style.display = '';
     warn.className = 'alert alert-success';
-    warn.innerHTML = '<span class="alert-icon">✅</span><span>Excellent availability! Your schedule has plenty of room for focused study.</span>';
+    warn.innerHTML = '<span class="alert-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Excellent availability! Your schedule has plenty of room for focused study.</span>';
   } else {
     warn.style.display = 'none';
   }
@@ -500,7 +512,7 @@ function addCourseCard(course) {
           <div class="form-group">
             <label class="form-label">Difficulty</label>
             <div class="stars" id="stars-${id}">
-              ${[1,2,3,4,5].map(s=>`<button type="button" class="star-btn ${s<=course.difficulty?'filled':''}" onclick="setDiff('${id}',${s})">⭐</button>`).join('')}
+              ${[1,2,3,4,5].map(s=>`<button type="button" class="star-btn ${s<=course.difficulty?'filled':''}" onclick="setDiff('${id}',${s})"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="var(--amber-400)" stroke="var(--amber-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>`).join('')}
             </div>
             <div class="star-hint" id="hint-${id}">${diffLabel(course.difficulty)}</div>
           </div>
